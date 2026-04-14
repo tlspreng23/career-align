@@ -185,24 +185,24 @@ body {
   gap: 6px;
 }
 
-/* Three-point marker row: left label · Both · right label, each centred above its dot */
+/* Three-point marker row: left label · Both · right label */
 .slider-markers {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   width: 100%;
-  /* 11px = half of thumb width (22px), aligns dots with thumb centre at min/max */
   padding: 0 11px;
   box-sizing: border-box;
+  margin-bottom: 10px;
 }
 .slider-marker {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 7px;
   width: 36%;
 }
-.slider-marker.marker-center { width: 28%; }
+.slider-marker:first-child { justify-content: flex-start; }
+.slider-marker.marker-center { width: 28%; justify-content: center; }
+.slider-marker:last-child { width: 36%; justify-content: flex-end; }
 .slider-marker-text {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -211,14 +211,9 @@ body {
   line-height: 1.45;
   letter-spacing: 0.02em;
 }
-.slider-marker-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #d8d8d4;
-  border: 1.5px solid #b8b8b4;
-  flex-shrink: 0;
-}
+.slider-marker:first-child .slider-marker-text { text-align: left; }
+.slider-marker:last-child .slider-marker-text { text-align: right; }
+.slider-marker-dot { display: none; }
 
 .custom-slider {
   -webkit-appearance: none;
