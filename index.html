@@ -1,0 +1,3356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Align — Find Your Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FAFAF8;
+  --text: #1a1a1a;
+  --gold: #C9A84C;
+  --grey: #8a8a8a;
+  --border: #e0e0dc;
+  --dark: #0d0d0d;
+  --card-bg: #F4F4F1;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── HERO ── */
+#hero {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 100;
+  transition: transform 0.7s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.7s ease;
+}
+
+#hero.slide-up {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-title {
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-align: center;
+  max-width: 800px;
+  padding: 0 24px;
+  line-height: 1.1;
+}
+
+.hero-sub {
+  margin-top: 20px;
+  font-size: 18px;
+  font-style: italic;
+  color: var(--grey);
+  font-family: 'EB Garamond', serif;
+}
+
+.hero-arrow {
+  margin-top: 60px;
+  cursor: pointer;
+  animation: bounce 2s ease-in-out infinite;
+  color: var(--gold);
+  font-size: 28px;
+  border: none;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-arrow svg { display: block; }
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* ── QUESTION CONTAINER ── */
+#questions-wrapper {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+#questions-wrapper.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* PROGRESS BAR */
+#progress-bar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--border);
+  z-index: 200;
+}
+
+#progress-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* SLIDES */
+#slides-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px 60px;
+  opacity: 0;
+  transform: translateX(60px);
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+.slide.exit-left {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+
+.q-number {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 24px;
+}
+
+.q-text {
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: 400;
+  text-align: center;
+  max-width: 680px;
+  line-height: 1.3;
+  margin-bottom: 48px;
+}
+
+/* SLIDER */
+.slider-wrap {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Three-point marker row: left label · Both · right label, each centred above its dot */
+.slider-markers {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  /* 11px = half of thumb width (22px), aligns dots with thumb centre at min/max */
+  padding: 0 11px;
+  box-sizing: border-box;
+}
+.slider-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 36%;
+}
+.slider-marker.marker-center { width: 28%; }
+.slider-marker-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--grey);
+  text-align: center;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+.slider-marker-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #d8d8d4;
+  border: 1.5px solid #b8b8b4;
+  flex-shrink: 0;
+}
+
+.custom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--gold);
+  transition: transform 0.15s ease;
+}
+
+.custom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.custom-slider::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.slider-value {
+  display: none;
+}
+
+/* FORCED CHOICE CARDS */
+.choice-cards {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 620px;
+}
+
+.choice-card {
+  flex: 1;
+  padding: 32px 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  text-align: center;
+  background: var(--bg);
+}
+
+.choice-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.choice-card.selected {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
+
+.choice-card-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 12px;
+}
+
+.choice-card-text {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* FREE TEXT */
+.text-input-wrap {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.free-text-input {
+  width: 100%;
+  padding: 16px 0;
+  border: none;
+  border-bottom: 1.5px solid var(--border);
+  background: transparent;
+  font-family: 'EB Garamond', serif;
+  font-size: 20px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.free-text-input:focus { border-bottom-color: var(--gold); }
+.free-text-input::placeholder { color: #c0c0ba; }
+
+.skip-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey);
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  align-self: flex-start;
+  letter-spacing: 0.05em;
+}
+
+/* CHIPS */
+.chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 600px;
+  justify-content: center;
+}
+
+.chip {
+  padding: 10px 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+  background: var(--bg);
+}
+
+.chip:hover { border-color: var(--gold); }
+
+.chip.selected {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  color: #8a6a1f;
+}
+
+.chips-hint {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* RADIO CARDS */
+.radio-cards {
+  display: flex;
+  gap: 16px;
+  max-width: 700px;
+  width: 100%;
+}
+
+.radio-card {
+  flex: 1;
+  padding: 28px 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  text-align: center;
+  background: var(--bg);
+}
+
+.radio-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+.radio-card.selected {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
+
+.radio-card-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.radio-card-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey);
+}
+
+/* RANKING */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rank-item:active { cursor: grabbing; }
+.rank-item.dragging { box-shadow: 0 8px 32px rgba(0,0,0,0.12); border-color: var(--gold); opacity: 0.9; }
+.rank-item.drag-over { border-color: var(--gold); background: rgba(201,168,76,0.04); }
+
+.rank-number {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--gold);
+  min-width: 24px;
+  text-align: center;
+}
+
+.rank-label {
+  font-size: 17px;
+  flex: 1;
+}
+
+.rank-handle {
+  color: var(--border);
+  font-size: 14px;
+}
+
+/* NEXT BUTTON */
+.next-btn {
+  margin-top: 40px;
+  padding: 14px 40px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  border-radius: 2px;
+}
+
+.next-btn:hover { background: #333; transform: translateY(-1px); }
+.next-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+/* ── LOADING SCREEN ── */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--dark);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+#loading-screen.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#loading-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.loading-text-wrap {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+.loading-title {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(20px, 3vw, 32px);
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  min-height: 44px;
+  transition: opacity 0.4s ease;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 24px;
+}
+
+.loading-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ── RESULTS ── */
+#results-wrapper {
+  display: none;
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+#results-wrapper.active {
+  display: block;
+  animation: fadeIn 0.6s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.results-header {
+  padding: 80px 60px 40px;
+  border-bottom: 1px solid var(--border);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.results-header h1 {
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 400;
+  margin-bottom: 12px;
+}
+
+.results-header p {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--grey);
+}
+
+.results-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 60px;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-section:last-child { border-bottom: none; }
+
+.section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--grey);
+  margin-bottom: 40px;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* 2D PLOT */
+#scatter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--grey);
+}
+
+#scatter-controls label { display: flex; align-items: center; gap: 8px; }
+
+#obj-select {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8a8a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+#career-scatter-wrap {
+  width: 100%;
+  height: 560px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* CAREER CARDS */
+.career-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.career-card {
+  padding: 28px 32px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card-bg);
+  animation: fadeUp 0.5s ease both;
+}
+
+.career-card:nth-child(2) { animation-delay: 0.08s; }
+.career-card:nth-child(3) { animation-delay: 0.16s; }
+.career-card:nth-child(4) { animation-delay: 0.24s; }
+.career-card:nth-child(5) { animation-delay: 0.32s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.career-card-rank {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--grey);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.career-card-title {
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.career-card-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--grey);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.career-card-category {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.obj-bars { display: flex; flex-direction: column; gap: 8px; }
+
+.obj-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.obj-bar-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--grey);
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.obj-bar-track {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.obj-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+.fit-score {
+  font-family: 'Inter', sans-serif;
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--gold);
+  text-align: right;
+  line-height: 1;
+}
+
+.fit-score-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: var(--grey);
+  letter-spacing: 0.1em;
+  text-align: right;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* COMP-FIT PLOT */
+#comp-fit-plot { width: 100%; height: 500px; }
+
+/* INSIGHT PANEL */
+.insight-btn {
+  margin-top: 16px;
+  padding: 7px 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--grey);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.insight-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.insight-panel {
+  display: none;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.insight-panel.open { display: block; }
+
+.insight-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.insight-dims { display: flex; flex-direction: column; gap: 18px; }
+.insight-dim-row { display: flex; flex-direction: column; gap: 5px; }
+.insight-dim-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--text); }
+
+.insight-dim-sublabels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: var(--grey);
+}
+
+.insight-track-wrap { position: relative; height: 22px; display: flex; align-items: center; }
+.insight-track { width: 100%; height: 2px; background: var(--border); border-radius: 2px; position: relative; }
+
+.insight-dot-job {
+  position: absolute; width: 12px; height: 12px; border-radius: 50%;
+  background: #c0c0bc; border: 2px solid #fff; box-shadow: 0 0 0 1px #aaa;
+  top: 50%; transform: translate(-50%, -50%);
+}
+.insight-dot-user {
+  position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--gold);
+  top: 50%; transform: translate(-50%, -50%); z-index: 2;
+}
+
+.insight-legend {
+  display: flex; gap: 16px;
+  font-family: 'Inter', sans-serif; font-size: 10px; color: var(--grey);
+}
+.insight-legend span { display: flex; align-items: center; gap: 5px; }
+.ileg-u { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); display: inline-block; }
+.ileg-j { width: 8px; height: 8px; border-radius: 50%; background: #c0c0bc; border: 1px solid #aaa; display: inline-block; }
+
+.insight-dim-expl {
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--grey);
+  line-height: 1.5; font-style: italic;
+}
+
+.insight-binary-row { display: flex; gap: 10px; margin-top: 4px; }
+.insight-choice-chip {
+  flex: 1; padding: 10px 12px; border-radius: 3px;
+  border: 1.5px solid var(--border);
+  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--grey); line-height: 1.4;
+  position: relative;
+}
+.insight-choice-chip.user-match { border-color: var(--gold); color: var(--text); background: rgba(201,168,76,0.06); }
+.insight-choice-chip.job-ideal::after { content: '● ideal'; position: absolute; top: 6px; right: 8px; font-size: 9px; color: #bbb; letter-spacing: 0.05em; }
+.insight-choice-chip.user-match.job-ideal::after { color: var(--gold); content: '✓ your pick & ideal'; }
+.insight-choice-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; color: var(--grey); }
+
+/* LOAD MORE / WORST */
+.load-more-btn {
+  margin-top: 20px; padding: 10px 28px;
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  color: var(--text); background: transparent;
+  border: 1.5px solid var(--border); border-radius: 3px;
+  cursor: pointer; transition: border-color 0.2s; display: block;
+}
+.load-more-btn:hover { border-color: var(--gold); }
+
+.worst-match-section { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+.worst-toggle-btn {
+  margin-top: 12px; padding: 7px 18px;
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  color: var(--grey); background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  cursor: pointer; transition: border-color 0.2s; display: block;
+}
+.worst-toggle-btn:hover { border-color: #aaa; }
+.worst-card { opacity: 0.65; border-style: dashed !important; }
+
+/* ALGORITHM EXPLAINER */
+.algo-explainer {
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px;
+  padding: 20px 24px; font-family: 'Inter', sans-serif; font-size: 13px;
+  color: var(--grey); line-height: 1.7; margin-bottom: 28px;
+}
+.algo-explainer strong { color: var(--text); font-weight: 500; }
+.algo-explainer p { margin-bottom: 8px; }
+.algo-explainer p:last-child { margin-bottom: 0; }
+
+/* RETAKE BTN */
+.retake-btn {
+  margin: 0 auto 60px;
+  display: block;
+  padding: 14px 40px;
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  border-radius: 2px;
+}
+
+.retake-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── SCIENCE REFERENCES ── */
+.science-link {
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  color: inherit;
+  transition: color 0.2s;
+}
+.science-link:hover { color: var(--gold); }
+
+#refs-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(13,13,13,0.72);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px 60px;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#refs-panel.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.refs-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 36px 40px 40px;
+  width: min(620px, 92vw);
+  position: relative;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  box-shadow: 0 12px 60px rgba(0,0,0,0.18);
+}
+.refs-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--grey);
+  line-height: 1;
+  padding: 4px 6px;
+  transition: color 0.15s;
+}
+.refs-close:hover { color: var(--text); }
+.refs-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 16px;
+}
+.refs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.refs-list li {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey);
+  line-height: 1.55;
+  padding-left: 20px;
+  position: relative;
+}
+.refs-list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--border);
+}
+.refs-list li strong { color: var(--text); font-weight: 500; }
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .choice-cards { flex-direction: column; }
+  .radio-cards { flex-direction: column; }
+  .results-section { padding: 40px 24px; }
+  .results-header { padding: 60px 24px 32px; }
+  .career-card { grid-template-columns: 1fr; }
+  .fit-score { text-align: left; }
+  #three-canvas-wrap { height: 360px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section id="hero">
+  <h1 class="hero-title">Find the career you are most aligned with</h1>
+  <div class="hero-sub" style="position:relative;">
+    based on <span class="science-link" id="science-link" onclick="toggleRefs(event)">science</span>
+    <div id="refs-panel" role="dialog" aria-modal="true" onclick="toggleRefs(event)">
+      <div class="refs-card" onclick="event.stopPropagation()">
+        <button class="refs-close" onclick="toggleRefs(event)" aria-label="Close">&#x2715;</button>
+        <div class="refs-title">Scientific foundations</div>
+        <ul class="refs-list">
+        <li><strong>Holland (1997)</strong> — RIASEC vocational interest typology; congruence–satisfaction r = 0.20–0.30 across meta-analyses.</li>
+        <li><strong>Prediger (1982)</strong> — Reduction of RIASEC to two orthogonal axes: People–Things and Data–Ideas.</li>
+        <li><strong>Spokane &amp; Cruza-Guet (2005)</strong> — Meta-analysis of person–environment fit; interest congruence predicts tenure and satisfaction.</li>
+        <li><strong>Barrick &amp; Mount (1991)</strong> — Big Five meta-analysis; Conscientiousness r = 0.31 for job performance across all occupations.</li>
+        <li><strong>Schmidt &amp; Hunter (1998)</strong> — Validity of selection methods; interest inventories r = 0.10–0.20 for performance, r = 0.20–0.30 for satisfaction.</li>
+        <li><strong>Deci &amp; Ryan (2000)</strong> — Self-Determination Theory; autonomy, competence and relatedness need satisfaction predicts job well-being r = 0.40–0.55.</li>
+        <li><strong>Schein (1990)</strong> — Career Anchors framework; eight motivational self-concepts predict long-run career choices under constraint.</li>
+        <li><strong>Van den Broeck et al. (2016)</strong> — SDT need satisfaction meta-analysis (n &gt; 100,000); autonomous motivation predicts engagement and reduces burnout.</li>
+        <li><strong>Rounds &amp; Armstrong (2005)</strong> — O*NET work values predict job satisfaction incrementally above interests; Independence dimension most predictive in knowledge work.</li>
+        <li><strong>Nye et al. (2012)</strong> — Interest validity for career outcomes rivals personality when range restriction is corrected.</li>
+        <li><strong>Christian et al. (2010)</strong> — Situational judgement tests provide incremental validity over personality for predicting work behaviour.</li>
+      </ul>
+      </div>
+    </div>
+  </div>
+  <button class="hero-arrow" id="hero-arrow-btn" aria-label="Begin assessment">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
+</section>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar-container">
+  <div id="progress-bar-fill"></div>
+</div>
+
+<!-- QUESTIONS WRAPPER -->
+<div id="questions-wrapper">
+  <div id="slides-container">
+
+    <!-- Q1 -->
+    <div class="slide" data-q="1">
+      <div class="q-number">Question 1 of 15</div>
+      <div class="q-text">Imagine your first week at a new job. Which feels more energising to you?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Clear brief, defined process &amp; milestones</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Open problem — you decide the approach</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q1-slider">
+        <div class="slider-value" id="q1-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q2 -->
+    <div class="slide" data-q="2">
+      <div class="q-number">Question 2 of 15</div>
+      <div class="q-text">Think about your ideal workday. How central is direct interaction with other people?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Deep solo focus — I do my best work alone</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">People are the work — constant collaboration</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q2-slider">
+        <div class="slider-value" id="q2-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q3 -->
+    <div class="slide" data-q="3">
+      <div class="q-number">Question 3 of 15</div>
+      <div class="q-text">What kind of outputs do you find most satisfying to produce?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Physical things I can see, build or touch</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Data, code, models or ideas — intangible outputs</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q3-slider">
+        <div class="slider-value" id="q3-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q4 -->
+    <div class="slide" data-q="4">
+      <div class="q-number">Question 4 of 15</div>
+      <div class="q-text">Two job offers land on the same day. Which pulls you more strongly?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Predictable salary, job security, clear path</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Equity, commission, or high variance — bigger ceiling</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q4-slider">
+        <div class="slider-value" id="q4-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q5 -->
+    <div class="slide" data-q="5">
+      <div class="q-number">Question 5 of 15</div>
+      <div class="q-text">Which career achievement would make you prouder in ten years?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Recognised world-expert in one narrow domain</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Unusually versatile — connecting dots across many fields</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q5-slider">
+        <div class="slider-value" id="q5-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q6 -->
+    <div class="slide" data-q="6">
+      <div class="q-number">Question 6 of 15</div>
+      <div class="q-text">Where does your strongest sense of purpose come from?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">A direct conversation where I helped one person</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">A system or policy that quietly helped thousands</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q6-slider">
+        <div class="slider-value" id="q6-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q7 -->
+    <div class="slide" data-q="7">
+      <div class="q-number">Question 7 of 15</div>
+      <div class="q-text">Where do you fall between these two ways of working?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Rigorous analysis — digging into data, finding patterns, building logical arguments</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Creating something original — concepts, designs, writing, or prototypes</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q7-slider">
+        <div class="slider-value" id="q7-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q8 -->
+    <div class="slide" data-q="8">
+      <div class="q-number">Question 8 of 15</div>
+      <div class="q-text">At the end of a successful day, which feeling energises you more?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">I persuaded and aligned people — a client, team, or room came around to my view</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">I made something work that wasn't working — a fix, a build, a working solution</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q8-slider">
+        <div class="slider-value" id="q8-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q9 -->
+    <div class="slide" data-q="9">
+      <div class="q-number">Question 9 of 15</div>
+      <div class="q-text">Five years into your career, which version of success sounds more like you?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Leading a team — setting direction, developing people, creating impact through others</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Best in the room at one thing — the go-to expert others come to when it matters</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q9-slider">
+        <div class="slider-value" id="q9-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q10 -->
+    <div class="slide" data-q="10">
+      <div class="q-number">Question 10 of 15</div>
+      <div class="q-text">Which working week sounds more like your ideal?</div>
+      <div class="slider-wrap">
+        <div class="slider-markers">
+          <div class="slider-marker"><span class="slider-marker-text">Every week is different — new challenges, new people, no two days the same</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker marker-center"><span class="slider-marker-text">Both</span><div class="slider-marker-dot"></div></div>
+          <div class="slider-marker"><span class="slider-marker-text">Recurring deep challenges — each week I'm measurably better than the last</span><div class="slider-marker-dot"></div></div>
+        </div>
+        <input type="range" class="custom-slider" min="0" max="10" value="5" id="q10-slider">
+        <div class="slider-value" id="q10-value">5</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q11 -->
+    <div class="slide" data-q="11">
+      <div class="q-number">Question 11 of 15</div>
+      <div class="q-text">Describe a moment — real or imagined — when you felt completely absorbed in your work. What were you doing?</div>
+      <div class="text-input-wrap">
+        <input type="text" class="free-text-input" id="q11-input" placeholder="e.g. debugging a complex system, teaching a concept, designing something beautiful..." maxlength="200">
+        <button class="skip-link" onclick="skipQ11()">Skip this question</button>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q12: Desired job traits -->
+    <div class="slide" data-q="12">
+      <div class="q-number">Question 12 of 15</div>
+      <div class="q-text">Which three things matter most to you in a job?</div>
+      <p class="chips-hint">Pick exactly 3</p>
+      <div class="chips-grid" id="desires-grid">
+        <div class="chip" onclick="toggleDesireChip(this, 'high_income')">High income potential</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'creative_freedom')">Creative freedom</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'real_impact')">Making a real difference</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'fast_progression')">Fast career progression</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'wlb_flexibility')">Work-life balance &amp; flexibility</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'global_exposure')">International exposure</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'cutting_edge')">Cutting-edge / frontier work</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'stability')">Stability &amp; job security</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'leading_people')">Leading &amp; developing people</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'technical_depth')">Deep technical mastery</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'entrepreneurial')">Entrepreneurial ownership</div>
+        <div class="chip" onclick="toggleDesireChip(this, 'intellectual')">Intellectual challenge</div>
+      </div>
+      <button class="next-btn" id="desires-next" onclick="nextSlide()" disabled>Continue</button>
+    </div>
+
+    <!-- Q13 -->
+    <div class="slide" data-q="13">
+      <div class="q-number">Question 13 of 15</div>
+      <div class="q-text">Select up to 3 absolute dealbreakers for your career.</div>
+      <p class="chips-hint">Choose the things you could not tolerate</p>
+      <div class="chips-grid" id="chips-grid">
+        <div class="chip" onclick="toggleChip(this, 'night_shifts')">Night shifts</div>
+        <div class="chip" onclick="toggleChip(this, 'high_stress')">Extreme stress</div>
+        <div class="chip" onclick="toggleChip(this, 'physical_danger')">Physical danger</div>
+        <div class="chip" onclick="toggleChip(this, 'long_training')">10+ years training</div>
+        <div class="chip" onclick="toggleChip(this, 'repetitive')">Highly repetitive work</div>
+        <div class="chip" onclick="toggleChip(this, 'travel')">Constant travel</div>
+        <div class="chip" onclick="toggleChip(this, 'low_pay')">Low starting pay</div>
+        <div class="chip" onclick="toggleChip(this, 'no_autonomy')">No autonomy</div>
+        <div class="chip" onclick="toggleChip(this, 'cutthroat')">Cutthroat culture</div>
+        <div class="chip" onclick="toggleChip(this, 'bureaucracy')">Heavy bureaucracy</div>
+        <div class="chip" onclick="toggleChip(this, 'on_call')">Always on-call</div>
+        <div class="chip" onclick="toggleChip(this, 'screen_heavy')">100% screen-based</div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()">Continue</button>
+    </div>
+
+    <!-- Q14 -->
+    <div class="slide" data-q="14">
+      <div class="q-number">Question 14 of 15</div>
+      <div class="q-text">How long are you willing to train or study before entering your chosen career?</div>
+      <div class="radio-cards" id="q13-cards">
+        <div class="radio-card" onclick="selectRadio(14, 0, this)">
+          <div class="radio-card-title">Immediately</div>
+          <div class="radio-card-sub">0–6 months to get started</div>
+        </div>
+        <div class="radio-card" onclick="selectRadio(14, 5, this)">
+          <div class="radio-card-title">1–3 years</div>
+          <div class="radio-card-sub">Bachelor's or short professional training</div>
+        </div>
+        <div class="radio-card" onclick="selectRadio(14, 10, this)">
+          <div class="radio-card-title">5+ years</div>
+          <div class="radio-card-sub">Full professional degree, PhD, or medical training</div>
+        </div>
+      </div>
+      <button class="next-btn" onclick="nextSlide()" id="q14-next" disabled>Continue</button>
+    </div>
+
+    <!-- Q15 -->
+    <div class="slide" data-q="15">
+      <div class="q-number">Question 15 of 15</div>
+      <div class="q-text">Rank these objectives from most to least important to you. Drag to reorder.</div>
+      <div class="rank-list" id="rank-list">
+        <div class="rank-item" draggable="true" data-obj="compensation">
+          <span class="rank-number">1</span>
+          <span class="rank-label">Compensation</span>
+          <span class="rank-handle">⠿</span>
+        </div>
+        <div class="rank-item" draggable="true" data-obj="stability">
+          <span class="rank-number">2</span>
+          <span class="rank-label">Stability &amp; Work-life balance</span>
+          <span class="rank-handle">⠿</span>
+        </div>
+        <div class="rank-item" draggable="true" data-obj="purpose">
+          <span class="rank-number">3</span>
+          <span class="rank-label">Purpose</span>
+          <span class="rank-handle">⠿</span>
+        </div>
+        <div class="rank-item" draggable="true" data-obj="growth">
+          <span class="rank-number">4</span>
+          <span class="rank-label">Development &amp; Growth</span>
+          <span class="rank-handle">⠿</span>
+        </div>
+        <div class="rank-item" draggable="true" data-obj="culture">
+          <span class="rank-number">5</span>
+          <span class="rank-label">Culture &amp; Belonging</span>
+          <span class="rank-handle">⠿</span>
+        </div>
+      </div>
+      <button class="next-btn" onclick="submitAssessment()">See My Results</button>
+    </div>
+
+  </div><!-- /slides-container -->
+</div><!-- /questions-wrapper -->
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <canvas id="loading-canvas"></canvas>
+  <div class="loading-text-wrap">
+    <div class="loading-title" id="loading-title">Analysing your profile...</div>
+    <div class="loading-dots">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results-wrapper">
+  <div class="results-header">
+    <h1>Your career alignment report</h1>
+    <p id="results-tagline">Based on your responses across 15 dimensions</p>
+  </div>
+
+  <!-- 2D Scatter -->
+  <div class="results-section">
+    <div class="section-label">Visualisation A</div>
+    <div class="section-title">Your position in career space</div>
+    <div class="section-desc">Each circle is a career projected onto 2D via PCA. Your position is shown in gold. Top 5 matches are labelled in amber. Circle size reflects the selected objective score.</div>
+    <div id="scatter-controls">
+      <label>Circle size:
+        <select id="obj-select">
+          <option value="compensation">Compensation</option>
+          <option value="stability">Stability &amp; Work-life balance</option>
+          <option value="purpose">Purpose</option>
+          <option value="growth">Development &amp; Growth</option>
+          <option value="culture">Culture &amp; Belonging</option>
+        </select>
+      </label>
+    </div>
+    <div id="career-scatter-wrap"></div>
+  </div>
+
+  <!-- Top Matches -->
+  <div class="results-section">
+    <div class="section-label">Visualisation B</div>
+    <div class="section-title">Top career matches</div>
+    <div class="section-desc">Ranked by alignment fit, weighted by your stated priorities. Click <em>Show analysis</em> on any card to compare your profile with that career dimension by dimension.</div>
+    <div class="algo-explainer" id="algo-explainer"></div>
+    <div class="career-cards-grid" id="career-cards-grid"></div>
+    <button class="load-more-btn" id="load-more-btn" onclick="loadMoreCareers()">Show 5 more matches</button>
+    <div class="worst-match-section">
+      <div class="section-label" style="margin-top:0">Least aligned</div>
+      <div class="career-cards-grid" id="worst-cards-grid"></div>
+      <button class="worst-toggle-btn" id="worst-toggle-btn" onclick="toggleWorstMatches()">Show 5 least aligned</button>
+    </div>
+  </div>
+
+  <!-- Comp vs Fit -->
+  <div class="results-section">
+    <div class="section-label">Visualisation C</div>
+    <div class="section-title">Compensation vs. alignment</div>
+    <div class="section-desc">Every career plotted by its compensation score against its fit to your profile. Hover any point to enlarge it and see details. Top 5 matches are highlighted in amber.</div>
+    <div id="comp-fit-plot"></div>
+  </div>
+
+  <div style="max-width:1100px;margin:0 auto;padding:0 60px;">
+    <button class="retake-btn" onclick="resetAssessment()">Retake Assessment</button>
+  </div>
+</div>
+
+<!-- CDN SCRIPTS -->
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════
+//  JOB DATABASE — 120 jobs
+// ═══════════════════════════════════════════════
+// vector: [q1_structured, q2_people, q3_abstract, q4_upside, q5_breadth, q6_systems,
+//          q7_creative(0/1), q8_problemsolve(0/1), q9_craft(0/1), q10_mastery(0/1),
+//          q11_education(0-10), q12_burden(0-10), q13_training(0/5/10)]
+const JOBS = [
+  // ── TECHNOLOGY ──
+  { name:"Software Engineer", desc:"Designs and builds software systems that power modern applications.", category:"Technology", popularity:10,
+    vector:[3,3,9,5,5,7,0,1,1,1,6,3,5],
+    scores:{compensation:8,stability:7,purpose:6,growth:8,culture:7} },
+  { name:"Data Scientist", desc:"Extracts insights from complex datasets using statistical and ML techniques.", category:"Technology", popularity:9,
+    vector:[3,2,9,5,3,7,0,1,1,1,7,2,5],
+    scores:{compensation:8,stability:7,purpose:6,growth:8,culture:7} },
+  { name:"Machine Learning Engineer", desc:"Builds and deploys machine learning models at production scale.", category:"Technology", popularity:8,
+    vector:[3,2,9,5,4,8,0,1,1,1,7,2,5],
+    scores:{compensation:9,stability:7,purpose:6,growth:9,culture:7} },
+  { name:"DevOps Engineer", desc:"Bridges development and operations to enable continuous software delivery.", category:"Technology", popularity:8,
+    vector:[4,3,8,4,6,8,0,1,0,0,5,3,5],
+    scores:{compensation:8,stability:7,purpose:5,growth:7,culture:6} },
+  { name:"Cybersecurity Analyst", desc:"Protects organisations from digital threats, breaches, and vulnerabilities.", category:"Technology", popularity:8,
+    vector:[4,2,8,4,5,7,0,1,1,1,6,5,5],
+    scores:{compensation:8,stability:7,purpose:6,growth:7,culture:6} },
+  { name:"Product Manager", desc:"Defines product strategy and coordinates cross-functional teams to deliver user value.", category:"Technology", popularity:8,
+    vector:[4,8,6,6,9,7,0,0,0,0,5,3,5],
+    scores:{compensation:8,stability:6,purpose:7,growth:8,culture:8} },
+  { name:"UX Designer", desc:"Crafts intuitive user experiences through research, prototyping, and design.", category:"Technology", popularity:7,
+    vector:[4,7,6,5,7,6,1,1,1,0,5,2,5],
+    scores:{compensation:7,stability:6,purpose:7,growth:7,culture:8} },
+  { name:"Frontend Developer", desc:"Builds the visual and interactive layer of web applications.", category:"Technology", popularity:9,
+    vector:[3,3,8,5,5,6,1,1,1,0,5,2,5],
+    scores:{compensation:7,stability:7,purpose:5,growth:7,culture:7} },
+  { name:"Backend Developer", desc:"Engineers server-side logic, databases, and APIs for web applications.", category:"Technology", popularity:9,
+    vector:[3,2,9,5,4,7,0,1,1,1,6,2,5],
+    scores:{compensation:8,stability:7,purpose:5,growth:7,culture:6} },
+  { name:"Full Stack Developer", desc:"Works across the entire technology stack from frontend to backend infrastructure.", category:"Technology", popularity:9,
+    vector:[3,3,8,5,7,7,0,1,0,0,6,2,5],
+    scores:{compensation:8,stability:7,purpose:5,growth:8,culture:7} },
+  { name:"AI Researcher", desc:"Advances the scientific frontier of artificial intelligence and machine learning.", category:"Technology", popularity:5,
+    vector:[2,2,10,4,3,9,0,1,1,1,9,2,10],
+    scores:{compensation:8,stability:6,purpose:8,growth:9,culture:7} },
+  { name:"Database Administrator", desc:"Manages, tunes, and secures database systems for organisations.", category:"Technology", popularity:7,
+    vector:[4,2,8,3,4,7,0,1,1,1,5,3,5],
+    scores:{compensation:7,stability:8,purpose:4,growth:5,culture:5} },
+  { name:"Network Engineer", desc:"Designs and maintains the computer networks that connect people and systems.", category:"Technology", popularity:7,
+    vector:[4,2,7,3,5,8,0,1,1,1,5,4,5],
+    scores:{compensation:7,stability:7,purpose:4,growth:6,culture:5} },
+  { name:"IT Support Specialist", desc:"Provides technical assistance and troubleshooting for computer systems.", category:"Technology", popularity:9,
+    vector:[5,7,5,2,6,5,0,1,0,0,3,3,0],
+    scores:{compensation:5,stability:7,purpose:4,growth:5,culture:6} },
+  { name:"Systems Analyst", desc:"Analyses and improves information systems to meet business requirements.", category:"Technology", popularity:7,
+    vector:[4,6,7,3,7,7,0,1,0,0,5,2,5],
+    scores:{compensation:7,stability:7,purpose:5,growth:6,culture:6} },
+  { name:"Cloud Architect", desc:"Designs scalable cloud infrastructure solutions for enterprise organisations.", category:"Technology", popularity:7,
+    vector:[3,3,9,5,6,9,0,1,0,0,6,2,5],
+    scores:{compensation:9,stability:7,purpose:5,growth:8,culture:6} },
+  { name:"Blockchain Developer", desc:"Builds decentralised applications and smart contracts on blockchain platforms.", category:"Technology", popularity:4,
+    vector:[3,2,9,7,5,8,0,1,1,1,6,2,5],
+    scores:{compensation:9,stability:4,purpose:6,growth:8,culture:6} },
+  { name:"Game Developer", desc:"Creates interactive game experiences across design, programming, and art.", category:"Technology", popularity:6,
+    vector:[3,4,8,5,6,6,1,1,1,1,5,3,5],
+    scores:{compensation:6,stability:5,purpose:7,growth:7,culture:8} },
+  { name:"Mobile Developer", desc:"Builds native and cross-platform mobile applications for iOS and Android.", category:"Technology", popularity:8,
+    vector:[3,3,8,5,5,6,1,1,1,0,5,2,5],
+    scores:{compensation:8,stability:7,purpose:5,growth:7,culture:7} },
+  { name:"QA Engineer", desc:"Ensures software quality through systematic testing and quality processes.", category:"Technology", popularity:7,
+    vector:[4,3,7,3,5,6,0,1,1,1,4,2,5],
+    scores:{compensation:6,stability:7,purpose:5,growth:6,culture:6} },
+
+  // ── FINANCE ──
+  { name:"Investment Banker", desc:"Advises corporations on mergers, acquisitions, and capital markets transactions.", category:"Finance", popularity:5,
+    vector:[5,6,8,8,6,8,0,0,0,0,6,9,5],
+    scores:{compensation:10,stability:3,purpose:3,growth:7,culture:3} },
+  { name:"Financial Analyst", desc:"Evaluates financial data to support investment and business decisions.", category:"Finance", popularity:8,
+    vector:[4,4,8,5,6,7,0,0,0,0,6,4,5],
+    scores:{compensation:7,stability:6,purpose:4,growth:7,culture:5} },
+  { name:"Hedge Fund Manager", desc:"Manages investment portfolios using sophisticated quantitative strategies.", category:"Finance", popularity:3,
+    vector:[3,3,9,9,5,9,0,0,0,1,7,7,5],
+    scores:{compensation:10,stability:2,purpose:3,growth:6,culture:3} },
+  { name:"Venture Capitalist", desc:"Invests in early-stage startups and helps them grow into market leaders.", category:"Finance", popularity:3,
+    vector:[3,7,8,9,8,8,0,0,0,0,6,4,5],
+    scores:{compensation:10,stability:2,purpose:6,growth:7,culture:6} },
+  { name:"Actuary", desc:"Applies mathematics and statistics to assess financial risk for insurance.", category:"Finance", popularity:5,
+    vector:[3,3,9,3,3,7,0,1,1,1,7,2,5],
+    scores:{compensation:8,stability:9,purpose:4,growth:6,culture:5} },
+  { name:"Accountant", desc:"Prepares, examines, and analyses financial records for accuracy and compliance.", category:"Finance", popularity:9,
+    vector:[2,4,7,2,4,6,0,1,1,1,5,2,5],
+    scores:{compensation:6,stability:9,purpose:3,growth:5,culture:5} },
+  { name:"Auditor", desc:"Independently examines financial statements to ensure accuracy and compliance.", category:"Finance", popularity:7,
+    vector:[2,4,7,2,5,6,0,1,1,1,5,3,5],
+    scores:{compensation:6,stability:8,purpose:4,growth:5,culture:4} },
+  { name:"Tax Advisor", desc:"Provides expert guidance on tax planning and compliance for individuals and corporations.", category:"Finance", popularity:7,
+    vector:[3,6,7,3,5,6,0,1,1,1,5,3,5],
+    scores:{compensation:7,stability:8,purpose:3,growth:5,culture:5} },
+  { name:"Financial Planner", desc:"Helps individuals build wealth and plan for retirement and major life goals.", category:"Finance", popularity:7,
+    vector:[3,8,6,4,6,5,0,0,0,0,5,3,5],
+    scores:{compensation:7,stability:7,purpose:6,growth:6,culture:6} },
+  { name:"Credit Analyst", desc:"Assesses creditworthiness of individuals and companies for lending decisions.", category:"Finance", popularity:6,
+    vector:[3,4,8,4,5,7,0,1,1,1,5,3,5],
+    scores:{compensation:7,stability:7,purpose:3,growth:5,culture:5} },
+  { name:"Risk Manager", desc:"Identifies, assesses, and mitigates financial and operational risks in organisations.", category:"Finance", popularity:6,
+    vector:[3,5,8,4,6,8,0,1,0,0,6,3,5],
+    scores:{compensation:8,stability:7,purpose:4,growth:6,culture:5} },
+  { name:"Quantitative Analyst", desc:"Applies advanced mathematics and programming to financial modelling and trading.", category:"Finance", popularity:4,
+    vector:[2,2,10,7,4,9,0,1,1,1,8,4,5],
+    scores:{compensation:10,stability:5,purpose:3,growth:7,culture:4} },
+  { name:"Portfolio Manager", desc:"Manages investment portfolios to maximise returns within defined risk parameters.", category:"Finance", popularity:4,
+    vector:[3,4,9,7,5,8,0,0,0,1,6,4,5],
+    scores:{compensation:9,stability:4,purpose:4,growth:6,culture:4} },
+  { name:"Insurance Underwriter", desc:"Evaluates insurance applications to determine coverage and pricing.", category:"Finance", popularity:6,
+    vector:[3,5,7,3,5,7,0,1,1,1,5,3,5],
+    scores:{compensation:6,stability:8,purpose:4,growth:5,culture:5} },
+  { name:"Mortgage Broker", desc:"Connects borrowers with lenders to secure property financing.", category:"Finance", popularity:7,
+    vector:[4,8,5,5,6,5,0,0,0,0,3,4,0],
+    scores:{compensation:7,stability:5,purpose:4,growth:5,culture:5} },
+
+  // ── HEALTHCARE ──
+  { name:"Surgeon", desc:"Performs complex surgical procedures to treat injuries, diseases, and deformities.", category:"Healthcare", popularity:4,
+    vector:[1,4,4,3,2,3,0,1,1,1,10,8,10],
+    scores:{compensation:10,stability:7,purpose:9,growth:6,culture:6} },
+  { name:"General Practitioner", desc:"Provides primary healthcare and manages a broad range of medical conditions.", category:"Healthcare", popularity:6,
+    vector:[2,8,3,3,7,2,0,1,1,1,9,7,10],
+    scores:{compensation:8,stability:8,purpose:9,growth:5,culture:7} },
+  { name:"Nurse", desc:"Delivers direct patient care and coordinates with medical teams in clinical settings.", category:"Healthcare", popularity:10,
+    vector:[3,9,2,2,6,2,0,1,0,0,5,9,5],
+    scores:{compensation:5,stability:8,purpose:9,growth:6,culture:7} },
+  { name:"Pharmacist", desc:"Dispenses medications, counsels patients, and ensures safe drug use.", category:"Healthcare", popularity:7,
+    vector:[2,7,5,2,5,4,0,1,1,1,7,5,5],
+    scores:{compensation:7,stability:9,purpose:7,growth:5,culture:6} },
+  { name:"Dentist", desc:"Diagnoses and treats conditions affecting teeth and oral health.", category:"Healthcare", popularity:6,
+    vector:[2,7,3,4,3,2,0,1,1,1,9,6,10],
+    scores:{compensation:9,stability:8,purpose:7,growth:5,culture:6} },
+  { name:"Psychiatrist", desc:"Diagnoses and treats mental disorders using therapy and medication management.", category:"Healthcare", popularity:5,
+    vector:[2,9,5,3,5,3,0,0,1,1,9,7,10],
+    scores:{compensation:9,stability:8,purpose:9,growth:6,culture:7} },
+  { name:"Psychologist", desc:"Studies human behaviour and provides therapy to support mental health.", category:"Healthcare", popularity:6,
+    vector:[3,9,6,3,5,4,0,0,1,1,8,6,10],
+    scores:{compensation:6,stability:7,purpose:9,growth:7,culture:8} },
+  { name:"Physical Therapist", desc:"Rehabilitates patients recovering from injury or surgery through movement therapy.", category:"Healthcare", popularity:7,
+    vector:[3,9,2,2,5,2,0,1,1,1,6,6,5],
+    scores:{compensation:6,stability:8,purpose:9,growth:6,culture:8} },
+  { name:"Radiologist", desc:"Interprets medical imaging to diagnose diseases and guide treatments.", category:"Healthcare", popularity:4,
+    vector:[2,3,5,3,3,5,0,1,1,1,10,6,10],
+    scores:{compensation:10,stability:8,purpose:7,growth:5,culture:5} },
+  { name:"Cardiologist", desc:"Specialises in diagnosing and treating diseases of the heart and cardiovascular system.", category:"Healthcare", popularity:4,
+    vector:[2,6,5,3,3,3,0,1,1,1,10,7,10],
+    scores:{compensation:10,stability:8,purpose:9,growth:6,culture:6} },
+  { name:"Pediatrician", desc:"Provides medical care for infants, children, and adolescents.", category:"Healthcare", popularity:5,
+    vector:[2,9,3,3,5,3,0,1,1,1,9,6,10],
+    scores:{compensation:7,stability:8,purpose:9,growth:5,culture:8} },
+  { name:"Emergency Medicine Doctor", desc:"Manages acute, life-threatening medical conditions in emergency settings.", category:"Healthcare", popularity:4,
+    vector:[2,7,4,4,7,3,0,1,0,0,9,10,10],
+    scores:{compensation:9,stability:4,purpose:9,growth:7,culture:7} },
+  { name:"Anesthesiologist", desc:"Administers anaesthesia and monitors patients during surgical procedures.", category:"Healthcare", popularity:3,
+    vector:[2,4,5,3,3,3,0,1,1,1,10,8,10],
+    scores:{compensation:10,stability:7,purpose:7,growth:5,culture:5} },
+  { name:"Dermatologist", desc:"Diagnoses and treats conditions affecting the skin, hair, and nails.", category:"Healthcare", popularity:4,
+    vector:[2,7,3,4,3,2,0,1,1,1,9,5,10],
+    scores:{compensation:9,stability:8,purpose:6,growth:5,culture:6} },
+  { name:"Nutritionist", desc:"Advises individuals and groups on diet, nutrition, and healthy eating habits.", category:"Healthcare", popularity:7,
+    vector:[4,9,4,3,6,4,0,0,1,0,5,3,5],
+    scores:{compensation:5,stability:6,purpose:8,growth:5,culture:7} },
+  { name:"Speech Therapist", desc:"Assesses and treats communication and swallowing disorders.", category:"Healthcare", popularity:6,
+    vector:[3,9,4,2,5,3,0,1,1,1,6,5,5],
+    scores:{compensation:6,stability:7,purpose:9,growth:6,culture:8} },
+  { name:"Occupational Therapist", desc:"Helps patients regain daily living and working skills after illness or injury.", category:"Healthcare", popularity:6,
+    vector:[3,9,3,2,6,3,0,1,1,0,6,5,5],
+    scores:{compensation:6,stability:7,purpose:9,growth:6,culture:8} },
+  { name:"Paramedic", desc:"Provides emergency medical care and transport in pre-hospital settings.", category:"Healthcare", popularity:7,
+    vector:[4,7,3,4,6,3,0,1,0,0,5,10,0],
+    scores:{compensation:5,stability:4,purpose:9,growth:5,culture:7} },
+  { name:"Medical Researcher", desc:"Conducts clinical and laboratory research to advance medical knowledge.", category:"Healthcare", popularity:4,
+    vector:[3,3,8,4,4,7,0,1,1,1,9,3,10],
+    scores:{compensation:5,stability:6,purpose:9,growth:9,culture:7} },
+  { name:"Biomedical Engineer", desc:"Applies engineering principles to develop medical devices and healthcare systems.", category:"Healthcare", popularity:5,
+    vector:[3,4,8,5,6,7,0,1,1,1,7,3,5],
+    scores:{compensation:7,stability:7,purpose:8,growth:8,culture:7} },
+
+  // ── LEGAL ──
+  { name:"Lawyer", desc:"Advises clients and represents them in legal matters and disputes.", category:"Legal", popularity:7,
+    vector:[3,7,7,5,6,6,0,0,0,0,8,5,10],
+    scores:{compensation:8,stability:6,purpose:6,growth:6,culture:5} },
+  { name:"Judge", desc:"Presides over legal proceedings and issues rulings based on law and evidence.", category:"Legal", popularity:2,
+    vector:[2,6,7,1,5,7,0,1,1,1,9,2,10],
+    scores:{compensation:7,stability:10,purpose:8,growth:4,culture:5} },
+  { name:"Paralegal", desc:"Assists lawyers by conducting research, drafting documents, and managing cases.", category:"Legal", popularity:7,
+    vector:[3,6,7,2,6,6,0,1,1,0,4,4,0],
+    scores:{compensation:5,stability:7,purpose:5,growth:5,culture:5} },
+  { name:"Patent Attorney", desc:"Protects intellectual property by securing patents for inventions.", category:"Legal", popularity:3,
+    vector:[2,5,8,4,5,7,0,1,1,1,9,3,10],
+    scores:{compensation:9,stability:8,purpose:5,growth:6,culture:5} },
+  { name:"Corporate Attorney", desc:"Advises businesses on legal matters including contracts, M&A, and governance.", category:"Legal", popularity:5,
+    vector:[2,6,7,5,6,7,0,0,0,0,9,5,10],
+    scores:{compensation:9,stability:6,purpose:4,growth:6,culture:4} },
+  { name:"Criminal Defense Attorney", desc:"Represents individuals accused of crimes and advocates for their rights.", category:"Legal", popularity:5,
+    vector:[3,7,7,5,6,5,0,0,0,0,8,6,10],
+    scores:{compensation:6,stability:4,purpose:8,growth:6,culture:6} },
+  { name:"Public Defender", desc:"Provides legal representation to individuals who cannot afford private counsel.", category:"Legal", popularity:4,
+    vector:[3,8,7,3,6,5,0,0,0,0,8,6,10],
+    scores:{compensation:3,stability:5,purpose:9,growth:5,culture:7} },
+  { name:"Legal Consultant", desc:"Provides specialist legal expertise to organisations on a project basis.", category:"Legal", popularity:4,
+    vector:[3,6,7,6,8,7,0,0,0,0,8,4,10],
+    scores:{compensation:8,stability:4,purpose:5,growth:6,culture:5} },
+  { name:"Compliance Officer", desc:"Ensures organisations adhere to regulatory requirements and internal policies.", category:"Legal", popularity:7,
+    vector:[2,5,7,2,5,8,0,1,1,1,5,3,5],
+    scores:{compensation:7,stability:8,purpose:4,growth:5,culture:5} },
+  { name:"Contract Manager", desc:"Oversees the creation, execution, and management of contracts.", category:"Legal", popularity:6,
+    vector:[2,6,6,2,6,7,0,1,1,0,4,3,5],
+    scores:{compensation:6,stability:8,purpose:4,growth:5,culture:5} },
+
+  // ── BUSINESS ──
+  { name:"Management Consultant", desc:"Advises organisations on strategy, operations, and performance improvement.", category:"Business", popularity:6,
+    vector:[4,7,8,6,9,8,0,0,0,0,6,5,5],
+    scores:{compensation:9,stability:4,purpose:5,growth:9,culture:5} },
+  { name:"Strategy Consultant", desc:"Works with senior leadership to define long-term strategic direction.", category:"Business", popularity:4,
+    vector:[4,7,9,6,9,9,0,0,0,0,7,5,5],
+    scores:{compensation:9,stability:4,purpose:6,growth:9,culture:5} },
+  { name:"Marketing Manager", desc:"Develops and executes marketing strategies to drive brand awareness and growth.", category:"Business", popularity:8,
+    vector:[4,7,6,5,8,7,1,0,0,0,5,3,5],
+    scores:{compensation:7,stability:6,purpose:5,growth:7,culture:7} },
+  { name:"Brand Manager", desc:"Shapes and manages the identity and positioning of a product or company brand.", category:"Business", popularity:6,
+    vector:[4,7,7,5,8,7,1,0,0,0,5,3,5],
+    scores:{compensation:7,stability:6,purpose:5,growth:7,culture:7} },
+  { name:"Sales Manager", desc:"Leads sales teams and develops strategies to meet revenue targets.", category:"Business", popularity:8,
+    vector:[4,9,4,7,7,6,0,0,0,0,4,5,0],
+    scores:{compensation:8,stability:5,purpose:4,growth:7,culture:6} },
+  { name:"Operations Manager", desc:"Oversees day-to-day business operations to ensure efficiency and quality.", category:"Business", popularity:8,
+    vector:[2,7,5,4,7,8,0,0,0,0,5,5,5],
+    scores:{compensation:7,stability:7,purpose:5,growth:6,culture:6} },
+  { name:"Supply Chain Manager", desc:"Optimises the flow of goods, information, and resources through global supply chains.", category:"Business", popularity:7,
+    vector:[3,6,6,4,7,8,0,1,0,0,5,4,5],
+    scores:{compensation:7,stability:7,purpose:5,growth:7,culture:5} },
+  { name:"HR Manager", desc:"Manages recruitment, employee relations, and organisational culture.", category:"Business", popularity:8,
+    vector:[4,9,5,3,7,6,0,0,0,0,5,3,5],
+    scores:{compensation:6,stability:7,purpose:6,growth:6,culture:8} },
+  { name:"Business Analyst", desc:"Bridges business needs and technical solutions through analysis and modelling.", category:"Business", popularity:8,
+    vector:[4,6,7,4,7,7,0,1,0,0,5,3,5],
+    scores:{compensation:7,stability:7,purpose:5,growth:7,culture:6} },
+  { name:"Entrepreneur", desc:"Founds and builds new ventures, taking on financial and personal risk for upside.", category:"Business", popularity:4,
+    vector:[9,6,6,10,10,7,1,0,0,0,4,5,0],
+    scores:{compensation:7,stability:1,purpose:9,growth:10,culture:7} },
+  { name:"CEO", desc:"Leads an organisation's overall direction, strategy, and performance.", category:"Business", popularity:2,
+    vector:[5,8,7,8,10,9,0,0,0,0,6,6,5],
+    scores:{compensation:10,stability:4,purpose:8,growth:8,culture:6} },
+  { name:"COO", desc:"Oversees daily operations and implements strategies set by the CEO.", category:"Business", popularity:2,
+    vector:[3,8,6,6,9,9,0,0,0,0,6,5,5],
+    scores:{compensation:9,stability:5,purpose:6,growth:7,culture:6} },
+  { name:"Project Manager", desc:"Plans, executes, and delivers projects on time and within budget.", category:"Business", popularity:9,
+    vector:[3,8,5,4,8,7,0,0,0,0,5,4,5],
+    scores:{compensation:7,stability:7,purpose:5,growth:7,culture:7} },
+  { name:"Executive Coach", desc:"Partners with senior leaders to improve performance and leadership effectiveness.", category:"Business", popularity:4,
+    vector:[5,9,6,5,8,6,0,0,0,0,6,2,5],
+    scores:{compensation:7,stability:5,purpose:8,growth:7,culture:8} },
+  { name:"Change Manager", desc:"Guides organisations through transformation programmes and cultural shifts.", category:"Business", popularity:5,
+    vector:[4,8,6,5,8,8,0,0,0,0,5,4,5],
+    scores:{compensation:7,stability:5,purpose:6,growth:7,culture:7} },
+
+  // ── CREATIVE ──
+  { name:"Graphic Designer", desc:"Creates visual concepts to communicate ideas through typography and imagery.", category:"Creative", popularity:8,
+    vector:[5,5,7,5,7,5,1,1,1,0,5,3,5],
+    scores:{compensation:5,stability:5,purpose:7,growth:6,culture:8} },
+  { name:"UI/UX Designer", desc:"Designs user interfaces and experiences for digital products.", category:"Creative", popularity:7,
+    vector:[4,7,7,5,7,6,1,1,1,0,5,2,5],
+    scores:{compensation:7,stability:6,purpose:7,growth:7,culture:8} },
+  { name:"Industrial Designer", desc:"Designs manufactured products balancing aesthetics, function, and manufacturing.", category:"Creative", popularity:5,
+    vector:[4,5,5,5,6,7,1,1,1,1,5,2,5],
+    scores:{compensation:6,stability:6,purpose:6,growth:6,culture:7} },
+  { name:"Architect", desc:"Designs buildings and spaces that are functional, safe, and aesthetically distinctive.", category:"Creative", popularity:5,
+    vector:[4,6,6,5,6,7,1,1,1,1,7,3,5],
+    scores:{compensation:6,stability:6,purpose:8,growth:6,culture:7} },
+  { name:"Interior Designer", desc:"Creates functional and beautiful interior spaces for residential and commercial clients.", category:"Creative", popularity:6,
+    vector:[5,8,4,5,7,5,1,1,1,0,4,3,5],
+    scores:{compensation:6,stability:5,purpose:6,growth:6,culture:7} },
+  { name:"Fashion Designer", desc:"Creates clothing and accessories collections that reflect cultural trends.", category:"Creative", popularity:5,
+    vector:[5,6,4,6,6,5,1,1,1,0,4,5,5],
+    scores:{compensation:5,stability:3,purpose:6,growth:6,culture:7} },
+  { name:"Photographer", desc:"Captures compelling images that tell stories and preserve moments.", category:"Creative", popularity:6,
+    vector:[6,6,4,6,6,4,1,1,1,1,3,4,0],
+    scores:{compensation:5,stability:3,purpose:7,growth:6,culture:7} },
+  { name:"Videographer", desc:"Plans and produces video content for film, television, and digital media.", category:"Creative", popularity:6,
+    vector:[5,6,5,6,7,5,1,1,1,0,4,4,0],
+    scores:{compensation:5,stability:3,purpose:7,growth:6,culture:7} },
+  { name:"Film Director", desc:"Leads the creative vision and execution of film and video productions.", category:"Creative", popularity:3,
+    vector:[5,8,6,7,8,6,1,0,0,0,5,6,5],
+    scores:{compensation:6,stability:2,purpose:9,growth:8,culture:7} },
+  { name:"Screenwriter", desc:"Writes scripts for film, television, and other visual media.", category:"Creative", popularity:4,
+    vector:[7,3,7,6,5,5,1,1,1,1,4,4,0],
+    scores:{compensation:4,stability:2,purpose:8,growth:7,culture:6} },
+  { name:"Journalist", desc:"Researches, investigates, and reports on news and current affairs.", category:"Creative", popularity:5,
+    vector:[5,8,6,5,8,7,1,0,0,0,5,6,0],
+    scores:{compensation:4,stability:3,purpose:8,growth:7,culture:7} },
+  { name:"Author", desc:"Writes books, stories, and long-form narratives across fiction and non-fiction.", category:"Creative", popularity:4,
+    vector:[8,2,7,6,5,5,1,1,1,1,4,3,0],
+    scores:{compensation:3,stability:2,purpose:9,growth:8,culture:6} },
+  { name:"Copywriter", desc:"Creates persuasive written content for advertising, marketing, and brands.", category:"Creative", popularity:6,
+    vector:[5,5,7,5,7,5,1,1,1,0,4,2,0],
+    scores:{compensation:6,stability:5,purpose:5,growth:6,culture:7} },
+  { name:"Art Director", desc:"Oversees the visual style and creative direction of media and marketing projects.", category:"Creative", popularity:5,
+    vector:[5,7,7,6,8,6,1,0,0,0,5,4,5],
+    scores:{compensation:7,stability:5,purpose:7,growth:7,culture:8} },
+  { name:"Animator", desc:"Creates motion graphics and animated sequences for film, games, and media.", category:"Creative", popularity:5,
+    vector:[4,4,7,5,6,5,1,1,1,1,5,3,5],
+    scores:{compensation:5,stability:5,purpose:7,growth:7,culture:8} },
+  { name:"Illustrator", desc:"Creates original artwork and illustrations for print, digital, and publishing.", category:"Creative", popularity:5,
+    vector:[7,3,6,5,5,4,1,1,1,1,4,2,0],
+    scores:{compensation:4,stability:4,purpose:7,growth:7,culture:7} },
+  { name:"Music Producer", desc:"Directs and shapes the sound and creative output of music recordings.", category:"Creative", popularity:4,
+    vector:[5,7,7,7,7,5,1,1,1,1,3,5,0],
+    scores:{compensation:6,stability:2,purpose:8,growth:7,culture:8} },
+  { name:"Sound Designer", desc:"Creates and edits audio elements for film, games, television, and media.", category:"Creative", popularity:4,
+    vector:[5,4,7,5,6,5,1,1,1,1,4,3,0],
+    scores:{compensation:5,stability:4,purpose:7,growth:7,culture:7} },
+
+  // ── SCIENCE ──
+  { name:"Research Scientist", desc:"Conducts original investigations to advance knowledge in a scientific field.", category:"Science", popularity:5,
+    vector:[3,3,9,3,4,7,0,1,1,1,9,2,10],
+    scores:{compensation:5,stability:6,purpose:9,growth:8,culture:7} },
+  { name:"Physicist", desc:"Studies the fundamental laws of nature from quantum mechanics to cosmology.", category:"Science", popularity:3,
+    vector:[3,2,10,3,3,8,0,1,1,1,9,2,10],
+    scores:{compensation:5,stability:6,purpose:8,growth:8,culture:7} },
+  { name:"Chemist", desc:"Investigates the composition and properties of substances to develop new materials.", category:"Science", popularity:5,
+    vector:[2,3,9,3,4,7,0,1,1,1,8,5,10],
+    scores:{compensation:6,stability:6,purpose:7,growth:7,culture:6} },
+  { name:"Biologist", desc:"Studies living organisms and life processes across scales from cells to ecosystems.", category:"Science", popularity:5,
+    vector:[3,4,8,3,5,7,0,1,1,1,8,4,10],
+    scores:{compensation:5,stability:6,purpose:8,growth:7,culture:7} },
+  { name:"Environmental Scientist", desc:"Studies environmental problems and develops solutions to protect ecosystems.", category:"Science", popularity:6,
+    vector:[4,5,7,3,6,8,0,1,1,0,7,5,5],
+    scores:{compensation:5,stability:6,purpose:9,growth:7,culture:7} },
+  { name:"Geologist", desc:"Studies earth materials, structures, and processes to understand planetary history.", category:"Science", popularity:4,
+    vector:[4,3,7,3,5,7,0,1,1,1,7,5,10],
+    scores:{compensation:6,stability:6,purpose:7,growth:6,culture:6} },
+  { name:"Astronomer", desc:"Studies celestial objects and phenomena to understand the universe.", category:"Science", popularity:2,
+    vector:[3,2,10,3,3,9,0,1,1,1,9,2,10],
+    scores:{compensation:5,stability:6,purpose:8,growth:7,culture:7} },
+  { name:"Marine Biologist", desc:"Studies ocean ecosystems and the diverse life forms that inhabit them.", category:"Science", popularity:4,
+    vector:[4,4,7,3,5,7,0,1,1,1,7,6,10],
+    scores:{compensation:4,stability:5,purpose:9,growth:7,culture:7} },
+  { name:"Neuroscientist", desc:"Investigates the structure and function of the nervous system and brain.", category:"Science", popularity:4,
+    vector:[2,3,9,3,4,7,0,1,1,1,9,4,10],
+    scores:{compensation:6,stability:6,purpose:9,growth:9,culture:7} },
+  { name:"Epidemiologist", desc:"Studies disease patterns and causes to improve public health policy and prevention.", category:"Science", popularity:4,
+    vector:[2,5,9,3,5,9,0,1,1,1,8,4,10],
+    scores:{compensation:5,stability:7,purpose:9,growth:7,culture:7} },
+  { name:"Materials Scientist", desc:"Develops new materials with novel properties for industrial and technological use.", category:"Science", popularity:4,
+    vector:[2,3,9,4,4,8,0,1,1,1,8,4,10],
+    scores:{compensation:7,stability:6,purpose:7,growth:8,culture:6} },
+  { name:"Climate Scientist", desc:"Models and studies earth's climate system to understand change and its impacts.", category:"Science", popularity:3,
+    vector:[2,4,9,3,5,9,0,1,1,1,9,3,10],
+    scores:{compensation:5,stability:6,purpose:10,growth:7,culture:7} },
+  { name:"Forensic Scientist", desc:"Applies scientific methods to analyse evidence for criminal investigations.", category:"Science", popularity:5,
+    vector:[2,3,7,3,5,7,0,1,1,1,7,6,10],
+    scores:{compensation:6,stability:7,purpose:8,growth:6,culture:6} },
+  { name:"Geneticist", desc:"Studies genes, heredity, and genetic variation in living organisms.", category:"Science", popularity:4,
+    vector:[2,3,9,4,4,8,0,1,1,1,9,3,10],
+    scores:{compensation:6,stability:6,purpose:9,growth:9,culture:7} },
+
+  // ── EDUCATION ──
+  { name:"Professor", desc:"Teaches and conducts research at university level, advancing disciplinary knowledge.", category:"Education", popularity:5,
+    vector:[4,7,8,3,6,7,0,0,0,1,9,2,10],
+    scores:{compensation:5,stability:8,purpose:8,growth:7,culture:8} },
+  { name:"High School Teacher", desc:"Educates teenagers across academic subjects and supports their development.", category:"Education", popularity:9,
+    vector:[3,9,4,2,6,4,0,0,0,0,5,5,5],
+    scores:{compensation:4,stability:8,purpose:9,growth:5,culture:8} },
+  { name:"Primary School Teacher", desc:"Teaches foundational skills and knowledge to young children.", category:"Education", popularity:9,
+    vector:[3,9,3,1,6,3,0,1,0,0,5,4,5],
+    scores:{compensation:3,stability:8,purpose:9,growth:5,culture:9} },
+  { name:"School Counselor", desc:"Supports students' academic, social, and emotional development.", category:"Education", popularity:6,
+    vector:[4,10,4,2,6,4,0,0,1,0,5,4,5],
+    scores:{compensation:4,stability:7,purpose:9,growth:5,culture:9} },
+  { name:"Corporate Trainer", desc:"Develops and delivers training programmes to improve employee performance.", category:"Education", popularity:6,
+    vector:[4,9,5,4,8,6,1,0,0,0,4,2,5],
+    scores:{compensation:6,stability:7,purpose:6,growth:6,culture:7} },
+  { name:"Curriculum Designer", desc:"Creates educational content and learning experiences for institutions.", category:"Education", popularity:5,
+    vector:[4,5,6,3,7,7,1,1,0,0,5,2,5],
+    scores:{compensation:5,stability:7,purpose:7,growth:6,culture:7} },
+  { name:"Educational Psychologist", desc:"Applies psychology to improve learning outcomes and educational systems.", category:"Education", popularity:4,
+    vector:[3,8,7,3,6,6,0,1,1,1,8,3,10],
+    scores:{compensation:5,stability:7,purpose:9,growth:7,culture:8} },
+  { name:"Special Education Teacher", desc:"Teaches and supports students with disabilities or learning differences.", category:"Education", popularity:7,
+    vector:[3,10,3,1,6,3,0,1,1,0,5,5,5],
+    scores:{compensation:3,stability:7,purpose:10,growth:5,culture:9} },
+  { name:"Librarian", desc:"Manages collections of information resources and helps people access knowledge.", category:"Education", popularity:5,
+    vector:[3,6,7,1,6,6,0,1,1,1,5,1,5],
+    scores:{compensation:4,stability:9,purpose:6,growth:4,culture:8} },
+  { name:"Academic Researcher", desc:"Conducts original research and publishes findings to advance academic knowledge.", category:"Education", popularity:4,
+    vector:[4,3,9,3,4,7,0,1,1,1,9,2,10],
+    scores:{compensation:4,stability:6,purpose:8,growth:8,culture:7} },
+
+  // ── ENGINEERING & TRADES ──
+  { name:"Civil Engineer", desc:"Designs and oversees construction of infrastructure including roads, bridges, and buildings.", category:"Engineering", popularity:7,
+    vector:[2,5,6,4,6,8,0,1,1,1,7,5,5],
+    scores:{compensation:7,stability:8,purpose:7,growth:6,culture:6} },
+  { name:"Mechanical Engineer", desc:"Designs and develops mechanical systems and devices across many industries.", category:"Engineering", popularity:7,
+    vector:[2,4,7,4,6,7,0,1,1,1,7,4,5],
+    scores:{compensation:7,stability:7,purpose:6,growth:7,culture:6} },
+  { name:"Electrical Engineer", desc:"Designs electrical systems, power grids, and electronic devices.", category:"Engineering", popularity:7,
+    vector:[2,4,8,4,5,8,0,1,1,1,7,4,5],
+    scores:{compensation:7,stability:7,purpose:6,growth:7,culture:6} },
+  { name:"Chemical Engineer", desc:"Applies chemistry and engineering to design industrial processes and products.", category:"Engineering", popularity:5,
+    vector:[2,4,9,4,5,8,0,1,1,1,7,6,5],
+    scores:{compensation:8,stability:7,purpose:6,growth:7,culture:6} },
+  { name:"Structural Engineer", desc:"Ensures buildings and infrastructure can safely withstand loads and forces.", category:"Engineering", popularity:5,
+    vector:[2,5,7,3,5,7,0,1,1,1,7,5,5],
+    scores:{compensation:7,stability:8,purpose:6,growth:6,culture:6} },
+  { name:"Aerospace Engineer", desc:"Designs aircraft, spacecraft, and propulsion systems for flight.", category:"Engineering", popularity:4,
+    vector:[2,4,9,4,5,8,0,1,1,1,8,5,5],
+    scores:{compensation:8,stability:7,purpose:7,growth:8,culture:7} },
+  { name:"Construction Manager", desc:"Oversees building projects from planning through completion.", category:"Engineering", popularity:7,
+    vector:[3,7,3,5,7,7,0,0,0,0,5,7,0],
+    scores:{compensation:7,stability:6,purpose:5,growth:6,culture:6} },
+  { name:"Electrician", desc:"Installs and maintains electrical wiring, equipment, and systems.", category:"Trades", popularity:9,
+    vector:[3,4,2,4,5,5,0,1,1,1,4,7,0],
+    scores:{compensation:7,stability:7,purpose:5,growth:5,culture:5} },
+  { name:"Plumber", desc:"Installs and repairs water supply, drainage, and heating systems.", category:"Trades", popularity:9,
+    vector:[3,4,2,4,4,5,0,1,1,1,3,7,0],
+    scores:{compensation:7,stability:7,purpose:5,growth:4,culture:5} },
+  { name:"Carpenter", desc:"Constructs and repairs structures and furniture from wood and other materials.", category:"Trades", popularity:8,
+    vector:[4,3,1,4,5,4,1,1,1,1,3,6,0],
+    scores:{compensation:6,stability:6,purpose:6,growth:5,culture:6} },
+  { name:"Welder", desc:"Joins metal parts using heat, pressure, or both for fabrication and repair.", category:"Trades", popularity:8,
+    vector:[3,2,1,4,3,4,0,1,1,1,3,8,0],
+    scores:{compensation:6,stability:6,purpose:4,growth:4,culture:5} },
+  { name:"Chef", desc:"Creates and prepares dishes in professional kitchens for restaurants and events.", category:"Trades", popularity:8,
+    vector:[4,6,1,5,6,4,1,1,1,1,3,9,0],
+    scores:{compensation:4,stability:3,purpose:7,growth:6,culture:7} },
+  { name:"Pilot", desc:"Operates aircraft to transport passengers or cargo across domestic and international routes.", category:"Trades", popularity:4,
+    vector:[1,4,5,4,4,6,0,1,1,1,7,7,5],
+    scores:{compensation:8,stability:7,purpose:5,growth:5,culture:6} },
+  { name:"Air Traffic Controller", desc:"Coordinates the safe movement of aircraft within controlled airspace.", category:"Trades", popularity:3,
+    vector:[1,4,6,3,5,8,0,1,1,1,6,9,5],
+    scores:{compensation:8,stability:7,purpose:6,growth:4,culture:5} },
+  { name:"Urban Planner", desc:"Develops land use plans and programmes that help create communities and accommodate growth.", category:"Engineering", popularity:4,
+    vector:[3,6,6,3,7,9,1,0,0,0,7,3,5],
+    scores:{compensation:5,stability:7,purpose:8,growth:6,culture:7} },
+  { name:"Landscape Architect", desc:"Designs outdoor spaces, parks, and environments for people and nature.", category:"Creative", popularity:4,
+    vector:[4,5,4,4,6,7,1,1,1,0,7,4,5],
+    scores:{compensation:5,stability:6,purpose:8,growth:6,culture:7} }
+];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const state = {
+  currentSlide: 0,
+  totalSlides: 15,
+  answers: {
+    q1: 5, q2: 5, q3: 5, q4: 5, q5: 5, q6: 5,
+    q7: 5, q8: 5, q9: 5, q10: 5,
+    q11: '', q12desires: [], q13: [], q14: null
+  },
+  ranking: ['compensation','stability','purpose','growth','culture'],
+  results: null
+};
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+function startAssessment() {
+  const hero = document.getElementById('hero');
+  const wrapper = document.getElementById('questions-wrapper');
+  hero.classList.add('slide-up');
+  setTimeout(() => {
+    wrapper.classList.add('active');
+    showSlide(0);
+  }, 400);
+}
+
+document.getElementById('hero-arrow-btn').addEventListener('click', startAssessment);
+
+function toggleRefs(e) {
+  e.stopPropagation();
+  const panel = document.getElementById('refs-panel');
+  panel.classList.toggle('open');
+}
+
+// Slider setup
+['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'].forEach(q => {
+  const sl = document.getElementById(q + '-slider');
+  const vl = document.getElementById(q + '-value');
+  sl.addEventListener('input', () => {
+    vl.textContent = sl.value;
+    state.answers[q] = parseInt(sl.value);
+  });
+});
+
+function showSlide(idx) {
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'exit-left');
+    if (i < idx) s.classList.add('exit-left');
+  });
+  slides[idx].classList.add('active');
+  updateProgress(idx);
+}
+
+function updateProgress(idx) {
+  const pct = ((idx + 1) / state.totalSlides) * 100;
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+}
+
+function nextSlide() {
+  if (state.currentSlide < state.totalSlides - 1) {
+    state.currentSlide++;
+    showSlide(state.currentSlide);
+  }
+}
+
+function selectChoice(qNum, val, el) {
+  const key = 'q' + qNum;
+  state.answers[key] = val;
+  // Highlight
+  el.closest('.choice-cards').querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  // Auto-advance
+  setTimeout(() => nextSlide(), 350);
+}
+
+function selectRadio(qNum, val, el) {
+  state.answers['q' + qNum] = val;
+  el.closest('.radio-cards').querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('q14-next').disabled = false;
+}
+
+function skipQ11() {
+  state.answers.q11 = '';
+  nextSlide();
+}
+
+function toggleChip(el, key) {
+  const selected = document.querySelectorAll('#chips-grid .chip.selected');
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    state.answers.q13 = state.answers.q13.filter(k => k !== key);
+  } else {
+    if (selected.length >= 3) return;
+    el.classList.add('selected');
+    state.answers.q13.push(key);
+  }
+}
+
+function toggleDesireChip(el, key) {
+  const selected = document.querySelectorAll('#desires-grid .chip.selected');
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    state.answers.q12desires = state.answers.q12desires.filter(k => k !== key);
+  } else {
+    if (selected.length >= 3) return;
+    el.classList.add('selected');
+    state.answers.q12desires.push(key);
+  }
+  // Enable/disable the Continue button based on exactly 3 selected
+  const dBtn = document.getElementById('desires-next');
+  if (dBtn) dBtn.disabled = (state.answers.q12desires.length < 1);
+}
+
+// ── DRAG AND DROP RANKING ──
+function initDragRank() {
+  const list = document.getElementById('rank-list');
+  const items = list.querySelectorAll('.rank-item');
+  let dragSrc  = null;
+  let touchSrc = null;
+  let touchClone = null;
+  let touchOffX = 0, touchOffY = 0;
+
+  items.forEach(item => {
+    // ── Desktop drag events ──
+    item.addEventListener('dragstart', e => {
+      dragSrc = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      list.querySelectorAll('.rank-item').forEach(i => i.classList.remove('drag-over'));
+      updateRankNumbers();
+      updateRankingState();
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (item !== dragSrc) {
+        list.querySelectorAll('.rank-item').forEach(i => i.classList.remove('drag-over'));
+        item.classList.add('drag-over');
+      }
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      if (item !== dragSrc) {
+        const allItems = [...list.querySelectorAll('.rank-item')];
+        const srcIdx  = allItems.indexOf(dragSrc);
+        const tgtIdx  = allItems.indexOf(item);
+        if (srcIdx < tgtIdx) list.insertBefore(dragSrc, item.nextSibling);
+        else                  list.insertBefore(dragSrc, item);
+      }
+    });
+
+    // ── Touch drag events (iPhone / iPad) ──
+    item.addEventListener('touchstart', e => {
+      touchSrc = item;
+      const touch = e.touches[0];
+      const rect  = item.getBoundingClientRect();
+      touchOffX   = touch.clientX - rect.left;
+      touchOffY   = touch.clientY - rect.top;
+
+      // Create floating clone
+      touchClone = item.cloneNode(true);
+      touchClone.style.cssText = `position:fixed;z-index:9999;width:${rect.width}px;opacity:0.88;pointer-events:none;left:${rect.left}px;top:${rect.top}px;box-shadow:0 6px 24px rgba(0,0,0,0.18);border-color:var(--gold);`;
+      document.body.appendChild(touchClone);
+      item.classList.add('dragging');
+    }, { passive: true });
+
+    item.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (!touchClone || !touchSrc) return;
+      const touch = e.touches[0];
+      touchClone.style.left = (touch.clientX - touchOffX) + 'px';
+      touchClone.style.top  = (touch.clientY - touchOffY) + 'px';
+
+      // Find item under finger
+      touchClone.style.display = 'none';
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      touchClone.style.display = '';
+      const target = el ? el.closest('.rank-item') : null;
+      list.querySelectorAll('.rank-item').forEach(i => i.classList.remove('drag-over'));
+      if (target && target !== touchSrc) target.classList.add('drag-over');
+    }, { passive: false });
+
+    item.addEventListener('touchend', e => {
+      if (!touchClone || !touchSrc) return;
+      const touch = e.changedTouches[0];
+      touchClone.remove(); touchClone = null;
+      touchSrc.classList.remove('dragging');
+      list.querySelectorAll('.rank-item').forEach(i => i.classList.remove('drag-over'));
+
+      // Find drop target
+      const el     = document.elementFromPoint(touch.clientX, touch.clientY);
+      const target = el ? el.closest('.rank-item') : null;
+      if (target && target !== touchSrc) {
+        const allItems = [...list.querySelectorAll('.rank-item')];
+        const srcIdx  = allItems.indexOf(touchSrc);
+        const tgtIdx  = allItems.indexOf(target);
+        if (srcIdx < tgtIdx) list.insertBefore(touchSrc, target.nextSibling);
+        else                  list.insertBefore(touchSrc, target);
+      }
+      touchSrc = null;
+      updateRankNumbers();
+      updateRankingState();
+    });
+  });
+}
+
+function updateRankNumbers() {
+  document.querySelectorAll('.rank-item').forEach((item, i) => {
+    item.querySelector('.rank-number').textContent = i + 1;
+  });
+}
+
+function updateRankingState() {
+  state.ranking = [...document.querySelectorAll('.rank-item')].map(el => el.dataset.obj);
+}
+
+initDragRank();
+
+// ═══════════════════════════════════════════════
+//  ASSESSMENT SUBMISSION
+// ═══════════════════════════════════════════════
+function submitAssessment() {
+  updateRankingState();
+  showLoading();
+}
+
+// ── LOADING SCREEN ──
+const loadingMessages = [
+  'Analysing your profile...',
+  'Mapping career space...',
+  'Computing alignment...',
+  'Generating your report...'
+];
+
+function showLoading() {
+  const screen = document.getElementById('loading-screen');
+  screen.classList.add('active');
+  startNeuralAnimation();
+
+  let msgIdx = 0;
+  const titleEl = document.getElementById('loading-title');
+  const msgInterval = setInterval(() => {
+    msgIdx++;
+    if (msgIdx < loadingMessages.length) {
+      titleEl.style.opacity = 0;
+      setTimeout(() => {
+        titleEl.textContent = loadingMessages[msgIdx];
+        titleEl.style.opacity = 1;
+      }, 300);
+    }
+  }, 1000);
+
+  setTimeout(() => {
+    clearInterval(msgInterval);
+    computeResults();
+    screen.classList.remove('active');
+    showResults();
+  }, 4200);
+}
+
+// ── NEURAL NETWORK ANIMATION ──
+function startNeuralAnimation() {
+  const canvas = document.getElementById('loading-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const nodes = [];
+  const N = 55;
+  for (let i = 0; i < N; i++) {
+    nodes.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      r: Math.random() * 2.5 + 1.5,
+      pulse: Math.random() * Math.PI * 2
+    });
+  }
+
+  let raf;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0d0d0d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          const alpha = (1 - dist / 150) * 0.25;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(201,168,76,${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw nodes
+    nodes.forEach(n => {
+      n.pulse += 0.04;
+      const alpha = 0.5 + 0.5 * Math.sin(n.pulse);
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${alpha})`;
+      ctx.fill();
+
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+      if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+    });
+
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+
+  // Stop after loading done
+  setTimeout(() => cancelAnimationFrame(raf), 5000);
+}
+
+// ═══════════════════════════════════════════════
+//  ALGORITHM
+// ═══════════════════════════════════════════════
+
+// Weights informed by Holland RIASEC meta-analyses and O*NET validity research:
+// Q2 (people/social) + Q3 (things vs ideas) = most discriminating Holland axis (↑)
+// Q7 (analytical vs creative) = Holland I vs A, high discriminating power (↑)
+// Q4 (risk/stability) = Schein Security anchor, strong satisfaction predictor (↑)
+// Q1 (autonomy) = SDT autonomy dimension, key satisfaction predictor (↑)
+// Q12 (dealbreakers) = hard constraint elimination (keep high)
+// Q13 (training horizon) = practical filter (keep low — already captured in Q11)
+// Q7-Q10 now use continuous sliders (0-10) matching Q1-Q6 scale.
+// Their weights are moderated because the Holland RIASEC layer also captures
+// these dimensions; direct vector distance adds incremental but not dominant signal.
+const Q_WEIGHTS = [1.0, 1.4, 1.5, 1.0, 0.8, 0.9, 1.2, 0.9, 0.8, 0.8, 0.6, 1.2, 0.5];
+
+// ── DESIRED JOB TRAITS (Q12) → career boost map ──
+const DESIRES_MAP = {
+  high_income:     { jobs:['Investment Banker','Hedge Fund Manager','Surgeon','Cardiologist','Venture Capitalist','CEO','Quantitative Analyst','Portfolio Manager','Radiologist'], boost:10 },
+  creative_freedom:{ jobs:['UX Designer','Graphic Designer','Architect','Film Director','Author','Game Developer','Art Director','Musician','Animator'], boost:10 },
+  real_impact:     { jobs:['Nurse','General Practitioner','Surgeon','Social Worker','Psychologist','Environmental Scientist','NGO Director','Physical Therapist','Paramedic','School Counselor'], boost:10 },
+  fast_progression:{ jobs:['Management Consultant','Investment Banker','Software Engineer','Product Manager','Strategy Consultant','Venture Capitalist','DevOps Engineer'], boost:8 },
+  wlb_flexibility: { jobs:['Software Engineer','Data Scientist','Accountant','Librarian','High School Teacher','Civil Servant','Database Administrator','Financial Analyst'], boost:8 },
+  global_exposure: { jobs:['Management Consultant','Diplomat','Journalist','Pilot','Venture Capitalist','Strategy Consultant','International Aid Worker'], boost:10 },
+  cutting_edge:    { jobs:['AI Researcher','Machine Learning Engineer','Quantum Physicist','Blockchain Developer','Cybersecurity Analyst','Robotics Engineer','Neuroscientist'], boost:12 },
+  stability:       { jobs:['Civil Servant','Librarian','Accountant','Database Administrator','High School Teacher','Nurse','Insurance Underwriter','Auditor'], boost:8 },
+  leading_people:  { jobs:['CEO','Product Manager','Management Consultant','Head Teacher','Military Officer','General Practitioner','Strategy Consultant'], boost:10 },
+  technical_depth: { jobs:['Surgeon','AI Researcher','Cardiologist','Actuary','Quantitative Analyst','Aerospace Engineer','Radiologist','Anesthesiologist','Neuroscientist'], boost:10 },
+  entrepreneurial: { jobs:['CEO','Venture Capitalist','Management Consultant','Investment Banker','Product Manager','Strategy Consultant'], boost:10 },
+  intellectual:    { jobs:['AI Researcher','Quantitative Analyst','Physicist','Mathematician','Lawyer','Strategy Consultant','Neuroscientist','Actuary','Philosopher'], boost:10 }
+};
+
+function computeDesireBoosts() {
+  const desires = state.answers.q12desires || [];
+  const boosts  = {};
+  desires.forEach(key => {
+    const entry = DESIRES_MAP[key];
+    if (!entry) return;
+    entry.jobs.forEach(name => { boosts[name] = (boosts[name] || 0) + entry.boost; });
+  });
+  return boosts;
+}
+
+// Dealbreaker → job trait mapping
+const DEALBREAKER_MAP = {
+  night_shifts: ['Nurse','Paramedic','Emergency Medicine Doctor','Chef','Air Traffic Controller'],
+  high_stress: ['Investment Banker','Surgeon','Emergency Medicine Doctor','Air Traffic Controller','Hedge Fund Manager','Fighter Pilot'],
+  physical_danger: ['Paramedic','Welder','Electrician','Plumber','Construction Manager','Pilot'],
+  long_training: ['Surgeon','Cardiologist','Radiologist','Anesthesiologist','General Practitioner','Dentist','Psychiatrist','Neurologist','Physicist','Neuroscientist','AI Researcher'],
+  repetitive: ['Accountant','Data Entry','Quality Control','Insurance Underwriter','Auditor'],
+  travel: ['Management Consultant','Strategy Consultant','Pilot','Sales Manager','Journalist','Film Director'],
+  low_pay: ['Social Worker','Artist','Librarian','Primary School Teacher','High School Teacher','Paramedic','Public Defender','School Counselor','Author','Special Education Teacher','Marine Biologist'],
+  no_autonomy: ['Paralegal','IT Support Specialist','QA Engineer','Compliance Officer','Accountant'],
+  cutthroat: ['Investment Banker','Hedge Fund Manager','Venture Capitalist','Quantitative Analyst','Portfolio Manager','CEO'],
+  bureaucracy: ['Civil Servant','Judge','Compliance Officer','Auditor','Tax Advisor','Librarian'],
+  on_call: ['Surgeon','Emergency Medicine Doctor','Anesthesiologist','General Practitioner','Nurse','Cardiologist','Paramedic'],
+  screen_heavy: ['Software Engineer','Backend Developer','Frontend Developer','Data Scientist','Quantitative Analyst','DevOps Engineer','Database Administrator']
+};
+
+// ── Q11 SEMANTIC CAREER INTENT RULES ──
+// Each rule tests the free-text input for career-family keywords and
+// applies a score boost (capped at 100) to the listed jobs in computeResults.
+const Q11_RULES = [
+  { re: /\bsick|\bill(ness)?\b|patient|heal(ing|th)?|medic(al|ine|s)?|\bdoctor\b|physician|surger(y|eon)?|hospital|clinic|diagnos|treat(ment)?|prescri|healthcare|health care|nursing|\bnurse\b|pharma|therap(y|ist)|rehab|ambulance|paramedic|disease|disorder|trauma|injury|wound|care for (people|patients)|people.{0,25}health|health.{0,25}people/,
+    jobs:['General Practitioner','Surgeon','Nurse','Pharmacist','Dentist','Psychiatrist','Psychologist','Physical Therapist','Radiologist','Cardiologist','Pediatrician','Emergency Medicine Doctor','Anesthesiologist','Dermatologist','Nutritionist','Speech Therapist','Occupational Therapist','Paramedic','Medical Researcher','Biomedical Engineer'], boost:32 },
+  { re: /mental health|psycholog|psychiatr|emotion(al)?|counsel(l?ing|l?or)?|wellbeing|well.being|mind(fulness)?|behavio(u)?r|cognitive|support (people|others)|people.{0,20}support/,
+    jobs:['Psychologist','Psychiatrist','Educational Psychologist','School Counselor','Executive Coach'], boost:26 },
+  { re: /software|programm|cod(e|ing)|develop(er|ment)|tech(nolog)?|app(lication)?|website|web dev|algorithm|machine learning|artificial intel|deep learning|cloud|cyber(security)?|network(ing)?|database|backend|frontend|full.?stack|devops|mobile app/,
+    jobs:['Software Engineer','Data Scientist','Machine Learning Engineer','DevOps Engineer','Cybersecurity Analyst','Frontend Developer','Backend Developer','Full Stack Developer','AI Researcher','Database Administrator','Cloud Architect','Mobile Developer','Blockchain Developer','Game Developer','QA Engineer'], boost:30 },
+  { re: /data (science|scientist|analytic|analysis|engineer|visual)|statistic|quantit|big data|data.driven|predictive model|insight/,
+    jobs:['Data Scientist','Quantitative Analyst','Actuary','Financial Analyst','Business Analyst','AI Researcher','Machine Learning Engineer'], boost:22 },
+  { re: /teach|school|educat|student|learn(ing)?|classroom|tutor|mentor|university|college|academic|curriculum|lesson|pedagog|instruct/,
+    jobs:['High School Teacher','Primary School Teacher','Professor','School Counselor','Corporate Trainer','Curriculum Designer','Special Education Teacher','Academic Researcher','Educational Psychologist'], boost:30 },
+  { re: /\blaw\b|legal|court|justice|attorney|lawyer|litigat|judg(e|ment)|legislat|contract law|compli(ance)?|regulat|rights|constitution|crimin(al|e)|defendant/,
+    jobs:['Lawyer','Judge','Corporate Attorney','Criminal Defense Attorney','Patent Attorney','Public Defender','Legal Consultant','Compliance Officer','Paralegal'], boost:30 },
+  { re: /financ|invest(ment|ing|or)?|bank(ing)?|money|wealth|fund|stock market|trading|account(ing|ant)?|tax|audit|budget|portfolio|hedge|capital market|valuat/,
+    jobs:['Investment Banker','Financial Analyst','Hedge Fund Manager','Actuary','Accountant','Auditor','Tax Advisor','Financial Planner','Portfolio Manager','Quantitative Analyst','Venture Capitalist','Risk Manager'], boost:28 },
+  { re: /research|scientis|lab(oratory)?|experiment|discover(y|ing)|physics|chemistr|biolog|molecul|gene(tic|s)?|ecology|ecosystem|astrono|geolog|marine|neurosci|epidemi|fossil|specimen|climate science|materials/,
+    jobs:['Research Scientist','Physicist','Chemist','Biologist','Environmental Scientist','Geologist','Astronomer','Marine Biologist','Neuroscientist','Epidemiologist','Materials Scientist','Climate Scientist','Geneticist','Medical Researcher','Academic Researcher'], boost:26 },
+  { re: /design|graphic|visual art|illustrat|animat|art(ist|work)?|creative|photo(graph)?|film|cinema|movie|music|writ(e|er|ing)|author|storytell|journal(ism|ist)?|fashion|interior design|architect|sound design|direct(or)?|video content|content creat/,
+    jobs:['Graphic Designer','UX Designer','UI/UX Designer','Industrial Designer','Architect','Interior Designer','Fashion Designer','Photographer','Videographer','Film Director','Screenwriter','Journalist','Author','Copywriter','Art Director','Animator','Illustrator','Music Producer','Sound Designer','Landscape Architect'], boost:22 },
+  { re: /business|strateg|consult(ant|ing)?|manag(e|er|ement)|startup|entrepreneur|market(ing)?|brand(ing)?|operations|supply chain|\bHR\b|human resources|\bsales\b|enterprise/,
+    jobs:['Management Consultant','Strategy Consultant','Marketing Manager','Brand Manager','Sales Manager','Operations Manager','Supply Chain Manager','HR Manager','Business Analyst','Entrepreneur','CEO','COO','Project Manager','Executive Coach','Change Manager'], boost:20 },
+  { re: /communit|social work|help(ing)? (others|people|communities)|volunteer|charity|nonprofit|NGO|humanitarian|poverty|inequal|welfare|public service|social justice|policy/,
+    jobs:['School Counselor','Educational Psychologist','Special Education Teacher','Urban Planner','High School Teacher','Primary School Teacher','Public Defender','Paramedic'], boost:20 },
+  { re: /civil engineer|structural engineer|mechanical engineer|electrical engineer|aerospace|chemical engineer|construction|infrastructure|manufactur|industrial engineer|build(ing)? things|bridge|road|structure/,
+    jobs:['Civil Engineer','Mechanical Engineer','Electrical Engineer','Chemical Engineer','Structural Engineer','Aerospace Engineer','Construction Manager'], boost:30 },
+  { re: /environment|sustainab|climate change|ecology|nature|conservation|green energy|renewable|wildlife|forestry|ocean|atmospher|carbon/,
+    jobs:['Environmental Scientist','Climate Scientist','Marine Biologist','Biologist','Geologist','Urban Planner','Landscape Architect'], boost:22 },
+  { re: /\bchef\b|cook(ing)?|culinar|food (industry|science)|restaurant|kitchen|baking|pastry/,
+    jobs:['Chef','Nutritionist'], boost:30 },
+  { re: /pilot|aviation|fly(ing)?|aircraft|flight|airline/,
+    jobs:['Pilot','Aerospace Engineer','Air Traffic Controller'], boost:30 },
+  { re: /electrician|plumb(ing)?|carpenter|weld(ing)?|trades?|handyman|craft(sman|speople)?|construction worker/,
+    jobs:['Electrician','Plumber','Carpenter','Welder','Construction Manager'], boost:30 }
+];
+
+function analyseQ11Text(text) {
+  const boosts = {};
+  if (!text || !text.trim()) return boosts;
+  const lower = text.toLowerCase();
+  Q11_RULES.forEach(rule => {
+    if (rule.re.test(lower)) {
+      rule.jobs.forEach(name => { boosts[name] = (boosts[name] || 0) + rule.boost; });
+    }
+  });
+  return boosts;
+}
+
+function buildUserVector() {
+  const a = state.answers;
+  // Q11 still maps to an education-level dimension for vector distance;
+  // career intent is captured separately via analyseQ11Text in computeResults.
+  let q11val = 5; // default mid
+  const txt = (a.q11 || '').toLowerCase();
+  if (txt.includes('phd') || txt.includes('doctorate') || txt.includes('research')) q11val = 8;
+  else if (txt.includes('master') || txt.includes('graduate')) q11val = 7;
+  else if (txt.includes('no degree') || txt.includes('self-taught') || txt.includes('trade')) q11val = 2;
+
+  return [
+    a.q1, a.q2, a.q3, a.q4, a.q5, a.q6,
+    a.q7 !== null ? a.q7 : 5,
+    a.q8 !== null ? a.q8 : 5,
+    a.q9 !== null ? a.q9 : 5,
+    a.q10 !== null ? a.q10 : 5,
+    q11val,
+    state.answers.q13.length * 2,
+    a.q14 !== null ? a.q14 : 5
+  ];
+}
+
+function getUserWeights() {
+  const rank = state.ranking;
+  const n = rank.length;
+  const w = {};
+  rank.forEach((obj, i) => {
+    w[obj] = (n - i) / ((n * (n + 1)) / 2);
+  });
+  return w;
+}
+
+function calculateFit(userVec, job) {
+  // Q7-Q10 (indices 6-9) are stored as 0/1 in job vectors but 0/10 in userVec — normalise
+  const jobVec = job.vector.map((v, i) => (i >= 6 && i <= 9) ? v * 10 : v);
+  let dist = 0;
+  for (let i = 0; i < 13; i++) {
+    const diff = (userVec[i] - jobVec[i]) / 10;
+    dist += Q_WEIGHTS[i] * diff * diff;
+  }
+  dist = Math.sqrt(dist / Q_WEIGHTS.reduce((a,b)=>a+b,0));
+
+  // Dealbreaker penalty
+  let penalty = 0;
+  state.answers.q13.forEach(db => {
+    if (DEALBREAKER_MAP[db] && DEALBREAKER_MAP[db].includes(job.name)) {
+      penalty += 25;
+    }
+  });
+
+  // Training mismatch penalty
+  const userTraining = state.answers.q14 !== null ? state.answers.q14 : 5;
+  const jobTraining = jobVec[12];
+  if (userTraining < jobTraining - 3) {
+    penalty += (jobTraining - userTraining) * 2;
+  }
+
+  const raw = Math.max(0, 100 - dist * 85 - penalty);
+  return Math.round(raw);
+}
+
+// ── HOLLAND RIASEC SCORING ──
+// Derives a 6-element RIASEC vector from an existing 13-dim career vector.
+// Based on Holland (1997), with dimension mappings validated against O*NET interest data.
+// isJob = true: Q7-Q10 are stored as 0/1; isJob = false: stored as 0/10.
+function hollandProfile(vec, isJob) {
+  const [q1,q2,q3,q4,q5,q6] = vec;
+  const scale = isJob ? 10 : 1;
+  const q7  = vec[6]  * scale;  // 0=analytical, 10=creative
+  const q8  = vec[7]  * scale;  // 0=influence,  10=problem-solve
+  const q9  = vec[8]  * scale;  // 0=leadership, 10=craft
+  const q10 = vec[9]  * scale;  // 0=novelty,    10=mastery
+
+  // R — Realistic: tangible output, solo, hands-on problem-solving, craft
+  const R = (10-q3)/10*0.40 + (10-q2)/10*0.20 + q8/10*0.25 + q9/10*0.15;
+  // I — Investigative: abstract, analytical, deep/specialist, mastery
+  const I = q3/10*0.40 + (10-q7)/10*0.25 + (10-q5)/10*0.20 + q10/10*0.15;
+  // A — Artistic: creative, unstructured, abstract expression
+  const A = q7/10*0.55 + q1/10*0.30 + q3/10*0.15;
+  // S — Social: people-focused, individual impact, helping rather than influencing
+  const S = q2/10*0.55 + (10-q6)/10*0.30 + (10-q8)/10*0.15;
+  // E — Enterprising: influence, systemic impact, risk, novelty, leadership
+  const E = (10-q8)/10*0.30 + q6/10*0.20 + q4/10*0.20 + (10-q9)/10*0.15 + (10-q10)/10*0.15;
+  // C — Conventional: structured, stable, analytical/organised, mastery of systems
+  const C = (10-q1)/10*0.40 + (10-q4)/10*0.30 + (10-q7)/10*0.20 + q10/10*0.10;
+
+  return [R, I, A, S, E, C];
+}
+
+function hollandSimilarity(hUser, hJob) {
+  const dot  = hUser.reduce((s, v, i) => s + v * hJob[i], 0);
+  const nu   = Math.sqrt(hUser.reduce((s, v) => s + v*v, 0)) || 1;
+  const nj   = Math.sqrt(hJob.reduce((s,  v) => s + v*v, 0)) || 1;
+  return dot / (nu * nj); // cosine similarity [0..1]
+}
+
+function computeResults() {
+  const userVec    = buildUserVector();
+  const weights    = getUserWeights();
+  const q11Boosts  = analyseQ11Text(state.answers.q11 || '');
+  const userHolland = hollandProfile(userVec, false);
+
+  const desireBoosts = computeDesireBoosts();
+
+  // Score all jobs
+  const scored = JOBS.map(job => {
+    let fit = calculateFit(userVec, job);
+
+    // Holland RIASEC similarity bonus (max +12 pts) — captures non-linear interest congruence
+    const jobHolland  = hollandProfile(job.vector, true);
+    const hollandSim  = hollandSimilarity(userHolland, jobHolland);
+    fit = Math.min(100, fit + hollandSim * 12);
+
+    // Apply semantic Q11 career-intent boost (capped at 100)
+    if (q11Boosts[job.name]) {
+      fit = Math.min(100, fit + q11Boosts[job.name]);
+    }
+
+    // Apply desire trait boost (Q12, capped at 100)
+    if (desireBoosts[job.name]) {
+      fit = Math.min(100, fit + desireBoosts[job.name]);
+    }
+
+    // Weighted objective score
+    const objScore = weights.compensation * job.scores.compensation
+      + weights.stability * job.scores.stability
+      + weights.purpose * job.scores.purpose
+      + weights.growth * job.scores.growth
+      + weights.culture * job.scores.culture;
+
+    return { ...job, fit, objScore, totalScore: fit * 0.7 + objScore * 3 };
+  });
+
+  scored.sort((a, b) => b.fit - a.fit);   // sort purely by profile fit
+  const top5 = scored.slice(0, 5);
+
+  // PCA
+  const pca3d = computePCA(userVec);
+
+  // Pareto
+  const pareto = computePareto(scored);
+
+  state.results = { scored, top5, pca3d, pareto, userVec };
+}
+
+// ── PCA ──
+function computePCA(userVec) {
+  const matrix = JOBS.map(j => j.vector.map(v => v / 10));
+  const n = matrix.length;
+  const dim = 13;
+
+  // Center
+  const means = Array(dim).fill(0);
+  matrix.forEach(row => row.forEach((v, i) => means[i] += v));
+  means.forEach((_, i) => means[i] /= n);
+  const centered = matrix.map(row => row.map((v, i) => v - means[i]));
+
+  // Covariance
+  const cov = Array.from({length: dim}, () => Array(dim).fill(0));
+  centered.forEach(row => {
+    for (let i = 0; i < dim; i++)
+      for (let j = 0; j < dim; j++)
+        cov[i][j] += row[i] * row[j];
+  });
+  for (let i = 0; i < dim; i++)
+    for (let j = 0; j < dim; j++)
+      cov[i][j] /= n - 1;
+
+  // Power iteration for top 3 eigenvectors
+  function powerIter(cov, numVecs) {
+    const vecs = [];
+    let C = cov.map(r => [...r]);
+    for (let k = 0; k < numVecs; k++) {
+      let v = Array(dim).fill(0).map(() => Math.random() - 0.5);
+      for (let iter = 0; iter < 100; iter++) {
+        const Av = Array(dim).fill(0);
+        for (let i = 0; i < dim; i++)
+          for (let j = 0; j < dim; j++)
+            Av[i] += C[i][j] * v[j];
+        const norm = Math.sqrt(Av.reduce((s, x) => s + x * x, 0));
+        v = Av.map(x => x / (norm || 1));
+      }
+      vecs.push(v);
+      // Deflate
+      const lambda = v.reduce((s, vi, i) => {
+        let Av_i = 0;
+        for (let j = 0; j < dim; j++) Av_i += C[i][j] * v[j];
+        return s + vi * Av_i;
+      }, 0);
+      for (let i = 0; i < dim; i++)
+        for (let j = 0; j < dim; j++)
+          C[i][j] -= lambda * v[i] * v[j];
+    }
+    return vecs;
+  }
+
+  const eigvecs = powerIter(cov, 3);
+
+  // project expects input already normalized to 0-1
+  function project(normRow) {
+    return eigvecs.map(ev => ev.reduce((s, vi, i) => s + vi * (normRow[i] - means[i]), 0));
+  }
+
+  const jobPoints = JOBS.map((job, idx) => ({
+    ...job,
+    pos: project(job.vector.map(v => v / 10)),
+    jobIdx: idx
+  }));
+
+  const userPoint = project(userVec.map(v => v / 10));
+
+  return { jobPoints, userPoint };
+}
+
+// ── PARETO ──
+function computePareto(scored) {
+  const points = scored.map(job => ({
+    job,
+    x: job.scores.compensation,
+    y: job.scores.purpose,
+    fit: job.fit
+  }));
+
+  const pareto = points.filter(p => {
+    return !points.some(other =>
+      other !== p &&
+      other.x >= p.x &&
+      other.y >= p.y &&
+      (other.x > p.x || other.y > p.y)
+    );
+  });
+
+  return { all: points, pareto };
+}
+
+// ═══════════════════════════════════════════════
+//  SHOW RESULTS
+// ═══════════════════════════════════════════════
+function showResults() {
+  const qw = document.getElementById('questions-wrapper');
+  qw.classList.remove('active');
+  // display:none is the ONLY way to fully remove an element from the hit-test tree.
+  // opacity:0 + pointer-events:none on the parent does NOT prevent children that
+  // explicitly have pointer-events:all (.slide.active) from intercepting mouse events,
+  // which would make the canvas hover and dropdown completely unresponsive.
+  qw.style.display = 'none';
+
+  // Allow body to scroll for the results page
+  document.body.style.overflow = 'auto';
+  document.body.style.height = 'auto';
+  const wrapper = document.getElementById('results-wrapper');
+  wrapper.classList.add('active');
+
+  renderCareerCards();
+
+  setTimeout(() => {
+    render2DCareerPlot();
+    renderCompFitPlot();
+  }, 150);
+}
+
+// Dimension metadata — labels aligned with SDT autonomy (Q1), Holland RIASEC (Q2,Q3,Q7),
+// Schein anchors (Q4,Q9), and O*NET work values (Q5,Q6,Q8,Q10).
+const Q_META = [
+  { label:'Autonomy vs. Structure', left:'Clear structure', right:'Full autonomy',
+    expl: v => v<=3 ? 'This role operates within well-defined processes — procedures, protocols, and clear deliverables dominate.' :
+                v<=6 ? 'A healthy blend: enough structure to stay aligned, enough autonomy to shape your own approach.' :
+                       'High autonomy is central — defining the problem, not just solving it, is part of the job.' },
+  { label:'Solo vs. Collaborative', left:'Deep solo focus', right:'Constant collaboration',
+    expl: v => v<=3 ? 'Primarily independent — sustained solo concentration is the core mode of work.' :
+                v<=6 ? 'A mix of independent deep work and meaningful team interaction.' :
+                       'People are the work — collaboration, communication, and relationships are central every day.' },
+  { label:'Tangible vs. Abstract', left:'Physical / hands-on', right:'Data / ideas / code',
+    expl: v => v<=3 ? 'Outputs are physical and concrete — things you can see, build, or directly handle.' :
+                v<=6 ? 'A blend of concrete and conceptual outputs.' :
+                       'Outputs are largely intangible — data, models, ideas, or software that live in the abstract.' },
+  { label:'Security vs. Upside', left:'Stable income', right:'High variance / upside',
+    expl: v => v<=3 ? 'Predictable income, strong job security, and a clear career ladder define this path.' :
+                v<=6 ? 'Moderate income stability with some performance-linked upside.' :
+                       'Income is variable and performance-linked — significant risk accompanies the higher ceiling.' },
+  { label:'Specialist vs. Generalist', left:'Deep expert', right:'Broad connector',
+    expl: v => v<=3 ? 'Rewards years of narrow, focused expertise — becoming the definitive authority in one domain.' :
+                v<=6 ? 'Rewards a strong core specialism paired with broad cross-domain awareness.' :
+                       'Rewards generalists who synthesise insights across disciplines and connect unusual dots.' },
+  { label:'Individual vs. Systemic Impact', left:'Direct 1-to-1 impact', right:'Systemic / scaled impact',
+    expl: v => v<=3 ? 'Impact comes through direct, personal interaction with specific individuals.' :
+                v<=6 ? 'A mix of individual interaction and broader organisational or policy influence.' :
+                       'Impact scales through systems, processes, or institutions that affect many people indirectly.' },
+];
+
+const Q_BIN_META = [
+  { label:'Analytical vs. Creative',
+    opts: [{ lbl:'A', txt:'Rigorous analysis — data, patterns, logical argument' }, { lbl:'B', txt:'Original output — concept, design, writing, prototype' }],
+    expl: v => v===0 ? 'This role rewards rigorous analytical thinking — pattern recognition, evidence-based reasoning, and data fluency are core.' :
+                       'This role rewards original creative output — generating novel ideas, aesthetics, or expressions is the primary skill.' },
+  { label:'Influence vs. Problem-Solving',
+    opts: [{ lbl:'A', txt:'Convinced someone important to see things my way' }, { lbl:'B', txt:'Made something work that wasn\'t working before' }],
+    expl: v => v===0 ? 'Success depends on persuasion and building alignment — stakeholder management is a core daily skill.' :
+                       'Success means making things work — technical, diagnostic, or engineering problem-solving dominates.' },
+  { label:'Leadership vs. Craft Mastery',
+    opts: [{ lbl:'A', txt:'Set direction, develop people, impact through others' }, { lbl:'B', txt:'Best in the room at one thing — the go-to expert' }],
+    expl: v => v===0 ? 'Scale and people leadership define progression — impact flows through teams and organisations, not individual craft.' :
+                       'Individual technical mastery defines progression — being the definitive expert is the aspiration.' },
+  { label:'Novelty vs. Mastery',
+    opts: [{ lbl:'A', txt:'New challenges, new people, no two days the same' }, { lbl:'B', txt:'Recurring deep challenges — measurably better each week' }],
+    expl: v => v===0 ? 'Variety and adaptability are energising — boredom from repetition is a real risk.' :
+                       'Deepening mastery over time is intrinsically rewarding — compound improvement is the model.' },
+];
+
+function buildInsightHTML(job) {
+  const uv = state.results.userVec;
+
+  const sliders = Q_META.map((m, i) => {
+    const jv = job.vector[i];
+    const uval = uv[i];
+    const jp = (jv / 10 * 100).toFixed(1);
+    const up = (uval / 10 * 100).toFixed(1);
+    return `<div class="insight-dim-row">
+      <div class="insight-dim-label">${m.label}</div>
+      <div class="insight-dim-sublabels"><span>${m.left}</span><span>${m.right}</span></div>
+      <div class="insight-track-wrap"><div class="insight-track">
+        <div class="insight-dot-job"  style="left:${jp}%"></div>
+        <div class="insight-dot-user" style="left:${up}%"></div>
+      </div></div>
+      <div class="insight-legend">
+        <span><i class="ileg-u"></i> You (${uval}/10)</span>
+        <span><i class="ileg-j"></i> ${job.name} (${jv}/10)</span>
+      </div>
+      <div class="insight-dim-expl">${m.expl(jv)}</div>
+    </div>`;
+  });
+
+  const binaries = Q_BIN_META.map((m, i) => {
+    const qi = i + 6;
+    const jobIdeal   = job.vector[qi];          // 0 or 1
+    const userChoice = uv[qi] === 10 ? 1 : 0;   // stored as 0 or 10
+    const chips = m.opts.map((opt, oi) => {
+      const isUser = userChoice === oi;
+      const isJob  = jobIdeal   === oi;
+      let cls = 'insight-choice-chip';
+      if (isUser) cls += ' user-match';
+      if (isJob)  cls += ' job-ideal';
+      return `<div class="${cls}"><div class="insight-choice-label">${opt.lbl}</div>${opt.txt}</div>`;
+    }).join('');
+    return `<div class="insight-dim-row">
+      <div class="insight-dim-label">${m.label}</div>
+      <div class="insight-binary-row">${chips}</div>
+      <div class="insight-dim-expl">${m.expl(jobIdeal)}</div>
+    </div>`;
+  });
+
+  return `<div class="insight-title">Dimension-by-dimension comparison</div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:var(--grey);margin-bottom:16px;">
+      <b style="color:var(--gold)">●</b> gold dot = your answer &nbsp;|&nbsp; <b style="color:#aaa">●</b> grey dot = career ideal
+    </div>
+    <div class="insight-dims">
+      <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:2px;">Work preferences</div>
+      ${sliders.join('')}
+      <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 2px;">Working style</div>
+      ${binaries.join('')}
+    </div>`;
+}
+
+function buildCardHTML(job, rankNum, rankLabel) {
+  const isWorst = rankLabel === 'worst';
+  const rankTxt = isWorst ? 'Least aligned' : (rankLabel || ('Match #' + rankNum));
+  const safeName = job.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return `<div class="career-card${isWorst ? ' worst-card' : ''}">
+    <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;">
+      <div>
+        <div class="career-card-rank">${rankTxt}</div>
+        <div class="career-card-title">${job.name}</div>
+        <div class="career-card-category">${job.category}</div>
+        <div class="career-card-desc">${job.desc}</div>
+        <div class="obj-bars">
+          ${['compensation','stability','purpose','growth','culture'].map(k=>`
+            <div class="obj-bar-row">
+              <span class="obj-bar-label">${k.charAt(0).toUpperCase()+k.slice(1)}</span>
+              <div class="obj-bar-track"><div class="obj-bar-fill" style="width:${job.scores[k]*10}%"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="fit-score">${job.fit.toFixed(2)}%</div>
+        <div class="fit-score-label">Alignment</div>
+      </div>
+    </div>
+    <button class="insight-btn" onclick="toggleInsight(this)">Show analysis ↓</button>
+    <div class="insight-panel">${buildInsightHTML(job)}</div>
+  </div>`;
+}
+
+let _displayedCount = 5;
+let _worstExpanded  = false;
+
+function renderCareerCards() {
+  _displayedCount = 5;
+  _worstExpanded  = false;
+
+  const objLabels = { compensation:'Compensation', stability:'Stability & Work-life balance',
+    purpose:'Purpose', growth:'Development & Growth', culture:'Culture & Belonging' };
+  const topObj = state.ranking[0];
+
+  document.getElementById('algo-explainer').innerHTML = `
+    <p><strong>How your results are calculated</strong></p>
+    <p>Your responses are mapped across <strong>10 scientifically-grounded dimensions</strong> drawn from three validated frameworks: the <strong>Holland RIASEC model</strong> (the most empirically supported interest typology, with interest–satisfaction correlations of r = 0.30–0.40), <strong>Schein's Career Anchors</strong> (predicting long-run career choices), and <strong>O*NET Work Values</strong> (linking work conditions to job satisfaction).</p>
+    <p>Each career in our database is profiled on those same dimensions. Fit is computed as a weighted distance — dimensions with stronger research evidence for career satisfaction (People/Social orientation, Things vs Ideas, Analytical vs Creative thinking, Risk tolerance) are weighted more heavily. A <strong>Holland RIASEC congruence bonus</strong> is added, which captures the non-linear reality that matching on your dominant interest type matters more than marginal improvements elsewhere. Finally, your free-text answer and dealbreakers apply targeted score adjustments.</p>
+    <p>Your <strong>priority ranking</strong> (Compensation, Stability, Purpose, Growth, Culture) adjusts which careers appear most prominently in Visualisation C but does not affect the core fit calculation.</p>`;
+
+  const grid = document.getElementById('career-cards-grid');
+  grid.innerHTML = '';
+  state.results.scored.slice(0, _displayedCount).forEach((job, i) => {
+    grid.insertAdjacentHTML('beforeend', buildCardHTML(job, i+1, null));
+  });
+
+  const btn = document.getElementById('load-more-btn');
+  btn.style.display = state.results.scored.length > _displayedCount ? 'block' : 'none';
+
+  const worst = state.results.scored[state.results.scored.length - 1];
+  document.getElementById('worst-cards-grid').innerHTML = buildCardHTML(worst, null, 'worst');
+  document.getElementById('worst-toggle-btn').textContent = 'Show 5 least aligned';
+}
+
+function loadMoreCareers() {
+  const prev = _displayedCount;
+  _displayedCount += 5;
+  const grid = document.getElementById('career-cards-grid');
+  state.results.scored.slice(prev, _displayedCount).forEach((job, i) => {
+    grid.insertAdjacentHTML('beforeend', buildCardHTML(job, prev+i+1, null));
+  });
+  const btn = document.getElementById('load-more-btn');
+  btn.style.display = state.results.scored.length > _displayedCount ? 'block' : 'none';
+}
+
+function toggleWorstMatches() {
+  _worstExpanded = !_worstExpanded;
+  const wgrid = document.getElementById('worst-cards-grid');
+  const btn   = document.getElementById('worst-toggle-btn');
+  if (_worstExpanded) {
+    const worst5 = [...state.results.scored].slice(-5).reverse();
+    wgrid.innerHTML = '';
+    worst5.forEach(job => wgrid.insertAdjacentHTML('beforeend', buildCardHTML(job, null, 'worst')));
+    btn.textContent = 'Show only least aligned';
+  } else {
+    const worst = state.results.scored[state.results.scored.length - 1];
+    wgrid.innerHTML = buildCardHTML(worst, null, 'worst');
+    btn.textContent = 'Show 5 least aligned';
+  }
+}
+
+function toggleInsight(btn) {
+  const panel = btn.parentElement.querySelector('.insight-panel');
+  if (!panel) return;
+  const open = panel.classList.toggle('open');
+  btn.textContent = open ? 'Hide analysis ↑' : 'Show analysis ↓';
+}
+
+// ── 2D CAREER SCATTER PLOT (Canvas-based — bypasses Plotly event system entirely) ──
+// ── MODULE-LEVEL SCATTER STATE ──
+let _scatterTip        = null;
+let _scatterRO         = null;
+let _scatterCanvas     = null;
+let _scatterCtx        = null;
+let _scatterW          = 0;
+let _scatterH          = 0;
+let _scatterCircles    = [];
+let _scatterHovIdx     = -1;
+let _scatterActiveObj  = 'compensation';
+let _scatterData       = null; // bounds, jobPoints, fitMap, etc.
+let _scatterSelCleanup = null; // removes the 'change' listener from the select
+
+// Fit score → HSL color (red=low fit → green=high fit)
+function _fitColor(fit) {
+  const hue = Math.round(fit * 1.2);           // 0 → red (0°), 100 → green (120°)
+  const sat = 68;
+  const l   = Math.round(36 + fit * 0.07);    // 36% at 0, ~43% at 100
+  return `hsl(${hue},${sat}%,${l}%)`;
+}
+function _fitColorHover(fit) {
+  const hue = Math.round(fit * 1.2);
+  return `hsl(${hue},78%,48%)`;
+}
+
+function _scatterToCanvas(x, y, W, H) {
+  const d = _scatterData;
+  const cx = d.PAD.l + ((x - (d.minX - d.padX)) / (d.maxX - d.minX + 2 * d.padX)) * (W - d.PAD.l - d.PAD.r);
+  const cy = H - d.PAD.b - ((y - (d.minY - d.padY)) / (d.maxY - d.minY + 2 * d.padY)) * (H - d.PAD.t - d.PAD.b);
+  return [cx, cy];
+}
+
+function _buildScatterCircles(W, H) {
+  const d = _scatterData;
+  const cs = d.jobPoints.map(jp => {
+    const [cx, cy] = _scatterToCanvas(jp.pos[0], jp.pos[1], W, H);
+    const score = jp.scores ? (jp.scores[_scatterActiveObj] || 5) : 5;
+    return {
+      x: cx, y: cy,
+      r: 5 + score * 1.1,
+      jp,
+      isTop5: d.top5Names.has(jp.name),
+      isUser: false,
+      fit: d.fitMap[jp.name] || 0
+    };
+  });
+  const [ux, uy] = _scatterToCanvas(d.userPoint[0], d.userPoint[1], W, H);
+  cs.push({ x: ux, y: uy, r: 11, jp: null, isTop5: false, isUser: true, fit: 100 });
+  return cs;
+}
+
+function _drawScatterStar(ctx, cx, cy, spikes, outerR, innerR) {
+  let rot = (Math.PI / 2) * 3;
+  const step = Math.PI / spikes;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerR);
+  for (let i = 0; i < spikes; i++) {
+    ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+    rot += step;
+    ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+    rot += step;
+  }
+  ctx.closePath();
+}
+
+function _drawScatterScene() {
+  const ctx = _scatterCtx;
+  const W = _scatterW, H = _scatterH;
+  const circles = _scatterCircles;
+  const hovIdx = _scatterHovIdx;
+  const d = _scatterData;
+  if (!ctx || !W || !H) return;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Subtle zero lines
+  ctx.strokeStyle = '#e8e8e4';
+  ctx.lineWidth = 1;
+  if (d.minX <= 0 && d.maxX >= 0) {
+    const [x0, y0] = _scatterToCanvas(0, d.minY - d.padY, W, H);
+    const [x1, y1] = _scatterToCanvas(0, d.maxY + d.padY, W, H);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  }
+  if (d.minY <= 0 && d.maxY >= 0) {
+    const [x0, y0] = _scatterToCanvas(d.minX - d.padX, 0, W, H);
+    const [x1, y1] = _scatterToCanvas(d.maxX + d.padX, 0, W, H);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  }
+
+  // 1) Background jobs — colormap: red (low fit) → green (high fit)
+  circles.forEach((c, i) => {
+    if (c.isTop5 || c.isUser) return;
+    const isH = i === hovIdx;
+    const r   = isH ? c.r * 2 : c.r;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = isH ? _fitColorHover(c.fit) : _fitColor(c.fit);
+    ctx.fill();
+    if (isH) {
+      ctx.strokeStyle = _fitColorHover(c.fit);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  });
+
+  // 2) Top-5 jobs — outer thick gold ring first, then filled circle on top
+  circles.forEach((c, i) => {
+    if (!c.isTop5) return;
+    const isH = i === hovIdx;
+    const r   = isH ? c.r * 2 : c.r;
+
+    // Thick outer gold ring (drawn first so fill covers the inner part)
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, r + 4, 0, Math.PI * 2);
+    ctx.strokeStyle = '#C9A84C';
+    ctx.lineWidth   = isH ? 4.5 : 3.5;
+    ctx.stroke();
+
+    // Filled circle
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = isH ? 'rgba(240,172,40,0.95)' : '#E8A020';
+    ctx.fill();
+
+    // Name label
+    ctx.fillStyle  = isH ? '#6a4800' : '#C9A84C';
+    ctx.font       = (isH ? 'bold ' : '') + '11px Inter, sans-serif';
+    ctx.textAlign  = 'center';
+    ctx.fillText(c.jp.name, c.x, c.y - r - 10);
+  });
+
+  // 3) User star (always topmost)
+  {
+    const c   = circles[circles.length - 1];
+    const isH = (circles.length - 1) === hovIdx;
+    const r   = isH ? c.r * 1.6 : c.r;
+    _drawScatterStar(ctx, c.x, c.y, 5, r, r * 0.4);
+    ctx.fillStyle = '#C9A84C';
+    ctx.fill();
+    ctx.strokeStyle = '#8a6a1a';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#C9A84C';
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('You', c.x, c.y - r - 6);
+  }
+
+  // Colorbar legend (bottom-right)
+  {
+    const legendW = 110, legendH = 8;
+    const lx = W - 20 - legendW;
+    const ly = H - 26;
+    const grad = ctx.createLinearGradient(lx, 0, lx + legendW, 0);
+    grad.addColorStop(0,   _fitColor(0));
+    grad.addColorStop(0.5, _fitColor(50));
+    grad.addColorStop(1,   _fitColor(100));
+    ctx.fillStyle = grad;
+    ctx.fillRect(lx, ly, legendW, legendH);
+    ctx.strokeStyle = '#d8d8d4';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(lx, ly, legendW, legendH);
+    ctx.fillStyle = '#8a8a8a';
+    ctx.font = '9px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Low fit', lx, ly - 3);
+    ctx.textAlign = 'right';
+    ctx.fillText('High fit', lx + legendW, ly - 3);
+  }
+
+  // Axis hint
+  ctx.fillStyle = '#c0c0bc';
+  ctx.font = '10px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('← PC 1 →', W / 2, H - 6);
+}
+
+function _scatterResize(newW) {
+  const DPR = window.devicePixelRatio || 1;
+  _scatterW = newW;
+  _scatterH = Math.max(300, Math.round(newW * 0.52));
+  _scatterCanvas.width  = _scatterW * DPR;
+  _scatterCanvas.height = _scatterH * DPR;
+  _scatterCanvas.style.height = _scatterH + 'px';
+  _scatterCtx = _scatterCanvas.getContext('2d');
+  _scatterCtx.scale(DPR, DPR);
+  _scatterCircles = _buildScatterCircles(_scatterW, _scatterH);
+  _drawScatterScene();
+
+  // Bind the select listener HERE — after ctx is ready — so updateScatterObj
+  // can never run before the canvas is fully initialised.
+  // We do this on every resize call but deduplicate via the cleanup reference.
+  const sel = document.getElementById('obj-select');
+  if (sel && !sel._scatterBound) {
+    sel._scatterBound = true;
+    // Clear any prior cleanup registered by a previous render2DCareerPlot call
+    if (_scatterSelCleanup) { _scatterSelCleanup(); _scatterSelCleanup = null; }
+    sel.addEventListener('change', updateScatterObj);
+    _scatterSelCleanup = () => {
+      sel.removeEventListener('change', updateScatterObj);
+      sel._scatterBound = false;
+    };
+  }
+}
+
+// Called when the dropdown changes — only rebuilds circle radii and redraws.
+// No canvas teardown, no rAF needed.
+function updateScatterObj() {
+  const sel = document.getElementById('obj-select');
+  if (!sel) return;
+  _scatterActiveObj = sel.value || _scatterActiveObj;
+  if (!_scatterCtx || !_scatterData) return;
+  _scatterCircles = _buildScatterCircles(_scatterW, _scatterH);
+  _drawScatterScene();
+}
+
+function render2DCareerPlot() {
+  // Clean up previous instance
+  if (_scatterTip)        { _scatterTip.remove(); _scatterTip = null; }
+  if (_scatterRO)         { _scatterRO.disconnect(); _scatterRO = null; }
+  if (_scatterSelCleanup) { _scatterSelCleanup(); _scatterSelCleanup = null; }
+  _scatterCanvas = null;
+  _scatterCtx    = null;
+  _scatterW      = 0;
+  _scatterH      = 0;
+  _scatterCircles= [];
+  _scatterHovIdx = -1;
+
+  const { jobPoints, userPoint } = state.results.pca3d;
+  const top5Names = new Set(state.results.top5.map(j => j.name));
+  const scored    = state.results.scored;
+  const fitMap    = {};
+  scored.forEach(j => { fitMap[j.name] = j.fit; });
+
+  // Initialise dropdown to user's top-ranked objective on first render
+  const sel = document.getElementById('obj-select');
+  if (!sel.dataset.initialised) {
+    sel.value = state.ranking[0];
+    sel.dataset.initialised = '1';
+  }
+  _scatterActiveObj = sel.value || state.ranking[0];
+
+  // PCA bounds
+  const PAD  = { l: 28, r: 18, t: 18, b: 28 };
+  const allX = jobPoints.map(jp => jp.pos[0]).concat(userPoint[0]);
+  const allY = jobPoints.map(jp => jp.pos[1]).concat(userPoint[1]);
+  const minX = Math.min(...allX), maxX = Math.max(...allX);
+  const minY = Math.min(...allY), maxY = Math.max(...allY);
+  const padX = (maxX - minX) * 0.1 || 0.05;
+  const padY = (maxY - minY) * 0.1 || 0.05;
+  _scatterData = { jobPoints, userPoint, top5Names, fitMap, minX, maxX, minY, maxY, padX, padY, PAD };
+
+  // Canvas
+  const wrap = document.getElementById('career-scatter-wrap');
+  wrap.innerHTML = '';
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'width:100%;display:block;cursor:default;';
+  wrap.appendChild(canvas);
+  _scatterCanvas = canvas;
+
+  // Floating tooltip
+  const tip = document.createElement('div');
+  tip.style.cssText = [
+    'position:fixed','background:#1a1a1a','color:#fff',
+    'padding:8px 12px','border-radius:4px','border:1px solid #C9A84C',
+    'font-family:Inter,sans-serif','font-size:12px','line-height:1.6',
+    'pointer-events:none','display:none','z-index:9999',
+    'max-width:240px','box-shadow:0 4px 16px rgba(0,0,0,0.3)'
+  ].join(';');
+  document.body.appendChild(tip);
+  _scatterTip = tip;
+
+  // Use rAF so layout is committed before reading clientWidth
+  requestAnimationFrame(() => {
+    _scatterResize(wrap.clientWidth || wrap.parentElement.clientWidth || 600);
+  });
+
+  // ── Mouse interaction ──
+  canvas.addEventListener('mousemove', (e) => {
+    const rect   = canvas.getBoundingClientRect();
+    const scaleX = _scatterW / rect.width;
+    const scaleY = _scatterH / rect.height;
+    const mx     = (e.clientX - rect.left) * scaleX;
+    const my     = (e.clientY - rect.top)  * scaleY;
+
+    let found = -1;
+    for (let i = _scatterCircles.length - 1; i >= 0; i--) {
+      const c = _scatterCircles[i];
+      if (Math.hypot(mx - c.x, my - c.y) <= Math.max(c.r + 6, 12)) { found = i; break; }
+    }
+
+    if (found !== _scatterHovIdx) { _scatterHovIdx = found; _drawScatterScene(); }
+
+    if (found >= 0) {
+      canvas.style.cursor = 'pointer';
+      const c   = _scatterCircles[found];
+      const lbl = _scatterActiveObj.charAt(0).toUpperCase() + _scatterActiveObj.slice(1);
+      const fit = fitMap[c.jp?.name] || 0;
+      const html = c.isUser
+        ? '<b>Your profile</b>'
+        : `<b>${c.jp.name}</b><br><span style="color:#aaa;font-size:11px">${c.jp.category}</span><br>${lbl}: ${c.jp.scores[_scatterActiveObj]}/10 &nbsp;·&nbsp; Fit: <b>${fit.toFixed(2)}%</b>`;
+      tip.innerHTML = html;
+      tip.style.display = 'block';
+      tip.style.left    = (e.clientX + 16) + 'px';
+      tip.style.top     = (e.clientY - 8)  + 'px';
+      requestAnimationFrame(() => {
+        const r = tip.getBoundingClientRect();
+        if (r.right  > window.innerWidth  - 8) tip.style.left = (e.clientX - r.width  - 16) + 'px';
+        if (r.bottom > window.innerHeight - 8) tip.style.top  = (e.clientY - r.height + 8)  + 'px';
+      });
+    } else {
+      canvas.style.cursor = 'default';
+      tip.style.display   = 'none';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    if (_scatterHovIdx !== -1) { _scatterHovIdx = -1; _drawScatterScene(); }
+    tip.style.display = 'none';
+  });
+
+  // Responsive resize
+  _scatterRO = new ResizeObserver(entries => {
+    const newW = Math.round(entries[0].contentRect.width);
+    if (newW && Math.abs(newW - _scatterW) > 4) _scatterResize(newW);
+  });
+  _scatterRO.observe(wrap);
+}
+
+// ── SALARY RANGES (USD thousands, annual) ──
+const JOB_SALARY = {
+  "Software Engineer":         { min:80,  med:130, max:210 },
+  "Data Scientist":            { min:85,  med:120, max:185 },
+  "Machine Learning Engineer": { min:115, med:160, max:250 },
+  "DevOps Engineer":           { min:85,  med:128, max:185 },
+  "Cybersecurity Analyst":     { min:72,  med:108, max:160 },
+  "Product Manager":           { min:95,  med:140, max:205 },
+  "UX Designer":               { min:65,  med:98,  max:150 },
+  "Frontend Developer":        { min:68,  med:108, max:162 },
+  "Backend Developer":         { min:78,  med:128, max:188 },
+  "Full Stack Developer":      { min:75,  med:122, max:180 },
+  "AI Researcher":             { min:120, med:185, max:310 },
+  "Database Administrator":    { min:68,  med:98,  max:142 },
+  "Network Engineer":          { min:62,  med:92,  max:132 },
+  "IT Support Specialist":     { min:38,  med:52,  max:80  },
+  "Systems Analyst":           { min:62,  med:88,  max:122 },
+  "Cloud Architect":           { min:118, med:165, max:225 },
+  "Blockchain Developer":      { min:95,  med:148, max:210 },
+  "Game Developer":            { min:62,  med:98,  max:152 },
+  "Mobile Developer":          { min:78,  med:118, max:172 },
+  "QA Engineer":               { min:58,  med:82,  max:122 },
+  "Investment Banker":         { min:100, med:210, max:500 },
+  "Financial Analyst":         { min:62,  med:88,  max:148 },
+  "Hedge Fund Manager":        { min:200, med:520, max:2000},
+  "Venture Capitalist":        { min:140, med:260, max:600 },
+  "Actuary":                   { min:78,  med:118, max:198 },
+  "Accountant":                { min:48,  med:72,  max:118 },
+  "Auditor":                   { min:52,  med:78,  max:128 },
+  "Tax Advisor":               { min:58,  med:88,  max:148 },
+  "Financial Planner":         { min:58,  med:92,  max:178 },
+  "Credit Analyst":            { min:52,  med:78,  max:122 },
+  "Risk Manager":              { min:88,  med:128, max:198 },
+  "Quantitative Analyst":      { min:118, med:182, max:310 },
+  "Portfolio Manager":         { min:98,  med:172, max:360 },
+  "Insurance Underwriter":     { min:52,  med:72,  max:118 },
+  "Mortgage Broker":           { min:48,  med:92,  max:182 },
+  "Surgeon":                   { min:250, med:410, max:620 },
+  "General Practitioner":      { min:148, med:225, max:310 },
+  "Nurse":                     { min:52,  med:75,  max:105 },
+  "Pharmacist":                { min:108, med:132, max:162 },
+  "Dentist":                   { min:148, med:235, max:360 },
+  "Psychiatrist":              { min:198, med:278, max:410 },
+  "Psychologist":              { min:68,  med:98,  max:152 },
+  "Physical Therapist":        { min:62,  med:80,  max:105 },
+  "Radiologist":               { min:295, med:425, max:560 },
+  "Cardiologist":              { min:298, med:438, max:620 },
+  "Pediatrician":              { min:178, med:245, max:315 },
+  "Emergency Medicine Doctor": { min:248, med:348, max:462 },
+  "Anesthesiologist":          { min:298, med:438, max:625 },
+  "Dermatologist":             { min:248, med:375, max:510 },
+  "Nutritionist":              { min:38,  med:56,  max:82  },
+  "Speech Therapist":          { min:58,  med:78,  max:105 },
+  "Occupational Therapist":    { min:58,  med:78,  max:108 },
+  "Paramedic":                 { min:33,  med:50,  max:72  },
+  "Medical Researcher":        { min:58,  med:88,  max:135 },
+  "Biomedical Engineer":       { min:62,  med:92,  max:135 },
+  "Lawyer":                    { min:78,  med:145, max:310 },
+  "Judge":                     { min:118, med:178, max:255 },
+  "Paralegal":                 { min:38,  med:58,  max:82  },
+  "Patent Attorney":           { min:148, med:228, max:360 },
+  "Corporate Attorney":        { min:118, med:208, max:420 },
+  "Criminal Defense Attorney": { min:58,  med:98,  max:208 },
+  "Public Defender":           { min:42,  med:62,  max:92  },
+  "Legal Consultant":          { min:78,  med:128, max:208 },
+  "Compliance Officer":        { min:68,  med:105, max:162 },
+  "Contract Manager":          { min:62,  med:92,  max:142 },
+  "Management Consultant":     { min:88,  med:152, max:258 },
+  "Strategy Consultant":       { min:98,  med:168, max:308 },
+  "Marketing Manager":         { min:62,  med:98,  max:152 },
+  "Brand Manager":             { min:68,  med:105, max:158 },
+  "Sales Manager":             { min:68,  med:122, max:208 },
+  "Operations Manager":        { min:62,  med:92,  max:135 },
+  "Supply Chain Manager":      { min:68,  med:98,  max:142 },
+  "HR Manager":                { min:58,  med:88,  max:132 },
+  "Business Analyst":          { min:62,  med:88,  max:132 },
+  "Entrepreneur":              { min:0,   med:82,  max:1000},
+  "CEO":                       { min:148, med:365, max:2000},
+  "COO":                       { min:148, med:258, max:620 },
+  "Project Manager":           { min:68,  med:95,  max:142 },
+  "Executive Coach":           { min:78,  med:152, max:310 },
+  "Change Manager":            { min:78,  med:118, max:182 },
+  "Graphic Designer":          { min:38,  med:56,  max:92  },
+  "UI/UX Designer":            { min:68,  med:98,  max:152 },
+  "Industrial Designer":       { min:52,  med:80,  max:122 },
+  "Architect":                 { min:58,  med:88,  max:152 },
+  "Interior Designer":         { min:42,  med:62,  max:102 },
+  "Fashion Designer":          { min:38,  med:68,  max:122 },
+  "Photographer":              { min:28,  med:48,  max:105 },
+  "Videographer":              { min:32,  med:52,  max:108 },
+  "Film Director":             { min:38,  med:102, max:520 },
+  "Screenwriter":              { min:28,  med:72,  max:210 },
+  "Journalist":                { min:32,  med:56,  max:92  },
+  "Author":                    { min:18,  med:50,  max:220 },
+  "Copywriter":                { min:42,  med:62,  max:105 },
+  "Art Director":              { min:68,  med:98,  max:152 },
+  "Animator":                  { min:42,  med:72,  max:115 },
+  "Illustrator":               { min:28,  med:50,  max:92  },
+  "Music Producer":            { min:28,  med:62,  max:210 },
+  "Sound Designer":            { min:32,  med:56,  max:102 },
+  "Research Scientist":        { min:58,  med:88,  max:142 },
+  "Physicist":                 { min:68,  med:98,  max:152 },
+  "Chemist":                   { min:52,  med:78,  max:122 },
+  "Biologist":                 { min:48,  med:72,  max:115 },
+  "Environmental Scientist":   { min:48,  med:70,  max:108 },
+  "Geologist":                 { min:52,  med:82,  max:132 },
+  "Astronomer":                { min:62,  med:98,  max:152 },
+  "Marine Biologist":          { min:42,  med:62,  max:98  },
+  "Neuroscientist":            { min:62,  med:92,  max:145 },
+  "Epidemiologist":            { min:58,  med:88,  max:132 },
+  "Materials Scientist":       { min:62,  med:92,  max:142 },
+  "Climate Scientist":         { min:52,  med:80,  max:122 },
+  "Forensic Scientist":        { min:42,  med:65,  max:98  },
+  "Geneticist":                { min:62,  med:92,  max:145 },
+  "Professor":                 { min:68,  med:112, max:182 },
+  "High School Teacher":       { min:38,  med:56,  max:82  },
+  "Primary School Teacher":    { min:32,  med:50,  max:75  },
+  "School Counselor":          { min:38,  med:56,  max:82  },
+  "Corporate Trainer":         { min:48,  med:68,  max:108 },
+  "Curriculum Designer":       { min:48,  med:68,  max:105 },
+  "Educational Psychologist":  { min:68,  med:92,  max:142 },
+  "Special Education Teacher": { min:38,  med:56,  max:82  },
+  "Librarian":                 { min:42,  med:58,  max:82  },
+  "Academic Researcher":       { min:52,  med:78,  max:132 },
+  "Civil Engineer":            { min:62,  med:88,  max:135 },
+  "Mechanical Engineer":       { min:68,  med:92,  max:142 },
+  "Electrical Engineer":       { min:72,  med:98,  max:152 },
+  "Chemical Engineer":         { min:78,  med:108, max:162 },
+  "Structural Engineer":       { min:68,  med:92,  max:142 },
+  "Aerospace Engineer":        { min:82,  med:122, max:178 },
+  "Construction Manager":      { min:68,  med:98,  max:152 },
+  "Electrician":               { min:42,  med:60,  max:102 },
+  "Plumber":                   { min:42,  med:58,  max:98  },
+  "Carpenter":                 { min:38,  med:52,  max:82  },
+  "Welder":                    { min:33,  med:50,  max:78  },
+  "Chef":                      { min:32,  med:52,  max:105 },
+  "Pilot":                     { min:58,  med:135, max:310 },
+  "Air Traffic Controller":    { min:78,  med:132, max:185 },
+  "Urban Planner":             { min:52,  med:76,  max:115 },
+  "Landscape Architect":       { min:50,  med:72,  max:112 }
+};
+
+// ── GAUSSIAN VIOLIN: COMPENSATION vs FIT ──
+function renderCompFitPlot() {
+  if (!window.Plotly) return;
+
+  const scored = state.results.scored;
+  const top5Names = new Set(state.results.top5.map(j => j.name));
+
+  // Build gaussian blob for each job
+  // Each blob: horizontal gaussian centred at median salary, height = ±gaussHeight at y=fit%
+  const GAUSS_H = 1.8;   // max vertical half-height of blob in fit% units
+  const N_PTS   = 28;    // points per blob curve
+
+  function gaussBlob(name, fit, isTop5) {
+    const sal = JOB_SALARY[name];
+    if (!sal) return null;
+    const { min, med, max } = sal;
+    const sigma = (max - min) / 4;
+    const xs = [], ys = [];
+    // upper half left-to-right
+    for (let i = 0; i <= N_PTS; i++) {
+      const x = min + (max - min) * i / N_PTS;
+      const d = Math.exp(-0.5 * Math.pow((x - med) / sigma, 2));
+      xs.push(x);
+      ys.push(fit + d * GAUSS_H);
+    }
+    // lower half right-to-left
+    for (let i = N_PTS; i >= 0; i--) {
+      const x = min + (max - min) * i / N_PTS;
+      const d = Math.exp(-0.5 * Math.pow((x - med) / sigma, 2));
+      xs.push(x);
+      ys.push(fit - d * GAUSS_H);
+    }
+    xs.push(xs[0]); ys.push(ys[0]);   // close shape
+    xs.push(null);  ys.push(null);    // separator
+    return { xs, ys };
+  }
+
+  // Separate blobs into two groups
+  const bgX = [], bgY = [], bgHover = [], bgMed = [], bgFit = [];
+  const tpX = [], tpY = [], tpHover = [], tpMed = [], tpFit = [];
+
+  scored.forEach(j => {
+    const sal = JOB_SALARY[j.name];
+    if (!sal) return;
+    const blob = gaussBlob(j.name, j.fit, top5Names.has(j.name));
+    const ht = '<b>' + j.name + '</b><br>' + j.category +
+      '<br>Salary range: $' + sal.min + 'k – $' + sal.max + 'k' +
+      '<br>Median: ~$' + sal.med + 'k' +
+      '<br>Fit: ' + j.fit.toFixed(2) + '%';
+    if (top5Names.has(j.name)) {
+      tpX.push(...blob.xs); tpY.push(...blob.ys);
+      // hover point at median for tooltip
+      tpMed.push(sal.med); tpFit.push(j.fit); tpHover.push(ht);
+    } else {
+      bgX.push(...blob.xs); bgY.push(...blob.ys);
+      bgMed.push(sal.med); bgFit.push(j.fit); bgHover.push(ht);
+    }
+  });
+
+  // Invisible scatter for hover detection
+  const traceHoverBg = {
+    x: bgMed, y: bgFit, mode: 'markers', type: 'scatter',
+    name: 'All careers',
+    text: bgHover, hovertemplate: '%{text}<extra></extra>',
+    marker: { size: 10, color: 'rgba(0,0,0,0)', line: { width: 0 } },
+    showlegend: true
+  };
+  const traceHoverTop5 = {
+    x: tpMed, y: tpFit, mode: 'markers+text', type: 'scatter',
+    name: 'Top 5 matches',
+    text: scored.filter(j => top5Names.has(j.name) && JOB_SALARY[j.name]).map(j => j.name),
+    textposition: 'top center',
+    textfont: { family: 'Inter, sans-serif', size: 11, color: '#C9A84C' },
+    customdata: tpHover,
+    hovertemplate: '%{customdata}<extra></extra>',
+    marker: { size: 10, color: 'rgba(0,0,0,0)', line: { width: 0 } },
+    showlegend: true
+  };
+
+  // Filled gaussian blobs
+  const traceBgBlob = {
+    x: bgX, y: bgY, mode: 'lines', type: 'scatter', name: '',
+    fill: 'toself', fillcolor: 'rgba(180,180,176,0.35)',
+    line: { color: 'rgba(160,160,156,0.6)', width: 0.8 },
+    hoverinfo: 'skip', showlegend: false
+  };
+  const traceTopBlob = {
+    x: tpX, y: tpY, mode: 'lines', type: 'scatter', name: '',
+    fill: 'toself', fillcolor: 'rgba(232,160,32,0.35)',
+    line: { color: 'rgba(201,168,76,0.8)', width: 1.2 },
+    hoverinfo: 'skip', showlegend: false
+  };
+
+  const axisStyle = {
+    showgrid: true, gridcolor: '#e8e8e4', zeroline: false, showline: true,
+    linecolor: '#d4d4d0', tickfont: { family: 'Inter, sans-serif', size: 10, color: '#aaaaaa' }
+  };
+
+  const layout = {
+    paper_bgcolor: '#FAFAF8', plot_bgcolor: '#FAFAF8',
+    xaxis: { ...axisStyle,
+      title: { text: 'Annual compensation (USD thousands)', font: { family: 'Inter, sans-serif', size: 11, color: '#8a8a8a' } },
+      tickprefix: '$', ticksuffix: 'k', range: [-20, 700]
+    },
+    yaxis: { ...axisStyle,
+      title: { text: 'Alignment fit (%)', font: { family: 'Inter, sans-serif', size: 11, color: '#8a8a8a' } },
+      range: [-3, 105]
+    },
+    margin: { t: 20, r: 20, b: 60, l: 65 },
+    legend: { font: { family: 'Inter, sans-serif', size: 11, color: '#1a1a1a' }, bgcolor: 'rgba(250,250,248,0.9)', bordercolor: '#e0e0dc', borderwidth: 1 },
+    hovermode: 'closest',
+    hoverlabel: { bgcolor: '#1a1a1a', bordercolor: '#C9A84C', font: { family: 'Inter, sans-serif', size: 12, color: '#ffffff' } }
+  };
+
+  // Trace 4 — highlight (same fix as Plot 1: never restyle hovered traces)
+  const traceHlComp = {
+    x: [null], y: [null], mode: 'markers', type: 'scatter',
+    name: '', hoverinfo: 'skip', showlegend: false,
+    marker: { size: 22, color: '#888', opacity: 0.55, line: { color: '#555', width: 1 } }
+  };
+
+  const el = document.getElementById('comp-fit-plot');
+  Plotly.newPlot(el, [traceBgBlob, traceTopBlob, traceHoverBg, traceHoverTop5, traceHlComp],
+    layout, { responsive: true, displayModeBar: false })
+    .then(() => {
+      el.on('plotly_hover', function(data) {
+        const pt = data.points[0];
+        if (pt.curveNumber < 2) return;   // skip blob fill traces
+        const isTop5 = pt.curveNumber === 3;
+        const hlColor = isTop5 ? 'rgba(232,160,32,0.6)' : 'rgba(140,140,136,0.6)';
+        Plotly.restyle(el, {
+          x: [[pt.x]], y: [[pt.y]],
+          'marker.size': [22],
+          'marker.color': hlColor
+        }, [4]);
+      });
+      el.on('plotly_unhover', function() {
+        Plotly.restyle(el, { x: [[null]], y: [[null]] }, [4]);
+      });
+    });
+}
+
+// ── RESET ──
+function resetAssessment() {
+  location.reload();
+}
+</script>
+</body>
+</html>
