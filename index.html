@@ -197,12 +197,11 @@ body {
 }
 .slider-marker {
   display: flex;
+  justify-content: center;
   align-items: center;
   width: 36%;
 }
-.slider-marker:first-child { justify-content: flex-start; }
-.slider-marker.marker-center { width: 28%; justify-content: center; }
-.slider-marker:last-child { width: 36%; justify-content: flex-end; }
+.slider-marker.marker-center { width: 28%; }
 .slider-marker-text {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -211,8 +210,6 @@ body {
   line-height: 1.45;
   letter-spacing: 0.02em;
 }
-.slider-marker:first-child .slider-marker-text { text-align: left; }
-.slider-marker:last-child .slider-marker-text { text-align: right; }
 .slider-marker-dot { display: none; }
 
 .custom-slider {
@@ -2387,6 +2384,29 @@ const TOLERANCE_MAP = {
     { jobs:['Author','Actor','Journalist','Politician','Artist','Sales Manager','Entrepreneur','Musician','Graphic Designer','Copywriter'], boost:10 }
 };
 
+// Normalized chip alignment: returns 0–maxPts based on fraction of user's
+// selected chips that list this job. Prevents popular careers from
+// accumulating disproportionate boosts just by appearing in many map entries.
+function chipAlignmentScore(jobName, actAnswers, probAnswers, envAnswers, tolAnswers) {
+  const allSelected = [...actAnswers, ...probAnswers, ...envAnswers, ...tolAnswers];
+  if (allSelected.length === 0) return 0;
+  let matches = 0;
+  actAnswers.forEach(label  => { if ((ACTIVITIES_MAP[label]?.jobs    || []).includes(jobName)) matches++; });
+  probAnswers.forEach(label => { if ((PROBLEMS_MAP[label]?.jobs      || []).includes(jobName)) matches++; });
+  envAnswers.forEach(label  => { if ((ENVIRONMENT_MAP[label]?.jobs   || []).includes(jobName)) matches++; });
+  tolAnswers.forEach(label  => { if ((TOLERANCE_MAP[label]?.jobs     || []).includes(jobName)) matches++; });
+  return (matches / allSelected.length) * 20; // max +20 pts
+}
+
+// Normalized desire alignment: returns 0–10 pts
+function desireAlignmentScore(jobName, desires) {
+  if (!desires || desires.length === 0) return 0;
+  let matches = 0;
+  desires.forEach(key => { if ((DESIRES_MAP[key]?.jobs || []).includes(jobName)) matches++; });
+  return (matches / desires.length) * 10; // max +10 pts
+}
+
+// (Legacy helper kept for reference — no longer used in main scoring)
 function computeChipBoosts(answers, map) {
   const boosts = {};
   (answers || []).forEach(label => {
@@ -2519,7 +2539,8 @@ function calculateFit(userVec, job) {
     penalty += (jobTraining - userTraining) * 2;
   }
 
-  const raw = Math.max(0, 100 - dist * 85 - penalty);
+  // Base capped at 72 so boosts (chips, Holland, desires) are meaningful contributors
+  const raw = Math.max(0, 72 - dist * 72 - penalty);
   return Math.round(raw);
 }
 
@@ -2563,32 +2584,28 @@ function computeResults() {
   const weights     = getUserWeights();
   const userHolland = hollandProfile(userVec, false);
 
-  const desireBoosts      = computeDesireBoosts();
-  const activityBoosts    = computeChipBoosts(state.answers.q8activities,  ACTIVITIES_MAP);
-  const problemBoosts     = computeChipBoosts(state.answers.q9problems,    PROBLEMS_MAP);
-  const environmentBoosts = computeChipBoosts(state.answers.q10environment, ENVIRONMENT_MAP);
-  const toleranceBoosts   = computeChipBoosts(state.answers.q11tolerance,  TOLERANCE_MAP);
+  const actAns = state.answers.q8activities  || [];
+  const probAns = state.answers.q9problems    || [];
+  const envAns  = state.answers.q10environment || [];
+  const tolAns  = state.answers.q11tolerance  || [];
+  const desires = state.answers.q12desires    || [];
 
   // Score all jobs
   const scored = JOBS.map(job => {
+    // Base: vector distance fit, max 72 pts
     let fit = calculateFit(userVec, job);
 
-    // Holland RIASEC similarity bonus (max +12 pts) — captures non-linear interest congruence
-    const jobHolland  = hollandProfile(job.vector, true);
-    const hollandSim  = hollandSimilarity(userHolland, jobHolland);
-    fit = Math.min(100, fit + hollandSim * 12);
+    // Holland RIASEC similarity bonus — max +8 pts
+    const jobHolland = hollandProfile(job.vector, true);
+    const hollandSim = hollandSimilarity(userHolland, jobHolland);
+    fit = Math.min(100, fit + hollandSim * 8);
 
-    // Apply Q8–Q11 pick-3 boosts (activities, problems, environment, tolerance)
-    const chipBoost = (activityBoosts[job.name] || 0)
-      + (problemBoosts[job.name] || 0)
-      + (environmentBoosts[job.name] || 0)
-      + (toleranceBoosts[job.name] || 0);
-    fit = Math.min(100, fit + chipBoost);
+    // Chip alignment (Q8–Q11): fraction of user's chip selections that map to
+    // this career, normalised so popular careers don't unfairly dominate — max +20 pts
+    fit = Math.min(100, fit + chipAlignmentScore(job.name, actAns, probAns, envAns, tolAns));
 
-    // Apply desire trait boost (Q12, capped at 100)
-    if (desireBoosts[job.name]) {
-      fit = Math.min(100, fit + desireBoosts[job.name]);
-    }
+    // Desire alignment (Q12): normalised — max +10 pts
+    fit = Math.min(100, fit + desireAlignmentScore(job.name, desires));
 
     // Weighted objective score
     const objScore = weights.compensation * job.scores.compensation
