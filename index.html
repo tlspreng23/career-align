@@ -187,21 +187,31 @@ body {
 
 /* Three-point marker row: left label · Both · right label */
 .slider-markers {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  position: relative;
   width: 100%;
-  padding: 0 11px;
   box-sizing: border-box;
+  min-height: 44px;
   margin-bottom: 10px;
 }
 .slider-marker {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: absolute;
   width: 36%;
+  text-align: center;
+  bottom: 0;
 }
-.slider-marker.marker-center { width: 28%; }
+.slider-marker:first-child {
+  left: 11px;
+  transform: translateX(-50%);
+}
+.slider-marker:last-child {
+  left: calc(100% - 11px);
+  transform: translateX(-50%);
+}
+.slider-marker.marker-center {
+  width: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+}
 .slider-marker-text {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -831,17 +841,19 @@ body {
   line-height: 1.5; font-style: italic;
 }
 
-.insight-binary-row { display: flex; gap: 10px; margin-top: 4px; }
-.insight-choice-chip {
-  flex: 1; padding: 10px 12px; border-radius: 3px;
-  border: 1.5px solid var(--border);
-  font-family: 'Inter', sans-serif; font-size: 12px; color: var(--grey); line-height: 1.4;
-  position: relative;
+.insight-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.insight-chip-pill {
+  padding: 5px 12px; border-radius: 100px;
+  font-family: 'Inter', sans-serif; font-size: 11px; line-height: 1.3;
+  border: 1.5px solid var(--border); color: var(--grey); background: var(--bg);
 }
-.insight-choice-chip.user-match { border-color: var(--gold); color: var(--text); background: rgba(201,168,76,0.06); }
-.insight-choice-chip.job-ideal::after { content: '● ideal'; position: absolute; top: 6px; right: 8px; font-size: 9px; color: #bbb; letter-spacing: 0.05em; }
-.insight-choice-chip.user-match.job-ideal::after { color: var(--gold); content: '✓ your pick & ideal'; }
-.insight-choice-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; color: var(--grey); }
+.insight-chip-pill.chip-match {
+  border-color: var(--gold); color: #7a5c14; background: rgba(201,168,76,0.1);
+}
+.insight-chip-match-note {
+  font-family: 'Inter', sans-serif; font-size: 11px; color: var(--grey);
+  font-style: italic; margin-top: 4px;
+}
 
 /* LOAD MORE / WORST */
 .load-more-btn {
@@ -2747,58 +2759,46 @@ function showResults() {
 
 // Dimension metadata — labels aligned with SDT autonomy (Q1), Holland RIASEC (Q2,Q3,Q7),
 // Schein anchors (Q4,Q9), and O*NET work values (Q5,Q6,Q8,Q10).
+// idx: vector index; scale: multiply job vector value to reach 0-10 range (indices 6-9 stored as 0/1)
 const Q_META = [
-  { label:'Autonomy vs. Structure', left:'Clear structure', right:'Full autonomy',
+  { idx:0, label:'Autonomy vs. Structure', left:'Clear structure', right:'Full autonomy',
     expl: v => v<=3 ? 'This role operates within well-defined processes — procedures, protocols, and clear deliverables dominate.' :
                 v<=6 ? 'A healthy blend: enough structure to stay aligned, enough autonomy to shape your own approach.' :
                        'High autonomy is central — defining the problem, not just solving it, is part of the job.' },
-  { label:'Solo vs. Collaborative', left:'Deep solo focus', right:'Constant collaboration',
+  { idx:1, label:'Solo vs. Collaborative', left:'Deep solo focus', right:'Constant collaboration',
     expl: v => v<=3 ? 'Primarily independent — sustained solo concentration is the core mode of work.' :
                 v<=6 ? 'A mix of independent deep work and meaningful team interaction.' :
                        'People are the work — collaboration, communication, and relationships are central every day.' },
-  { label:'Tangible vs. Abstract', left:'Physical / hands-on', right:'Data / ideas / code',
+  { idx:2, label:'Tangible vs. Abstract', left:'Physical / hands-on', right:'Data / ideas / code',
     expl: v => v<=3 ? 'Outputs are physical and concrete — things you can see, build, or directly handle.' :
                 v<=6 ? 'A blend of concrete and conceptual outputs.' :
                        'Outputs are largely intangible — data, models, ideas, or software that live in the abstract.' },
-  { label:'Security vs. Upside', left:'Stable income', right:'High variance / upside',
+  { idx:3, label:'Security vs. Upside', left:'Stable income', right:'High variance / upside',
     expl: v => v<=3 ? 'Predictable income, strong job security, and a clear career ladder define this path.' :
                 v<=6 ? 'Moderate income stability with some performance-linked upside.' :
                        'Income is variable and performance-linked — significant risk accompanies the higher ceiling.' },
-  { label:'Specialist vs. Generalist', left:'Deep expert', right:'Broad connector',
-    expl: v => v<=3 ? 'Rewards years of narrow, focused expertise — becoming the definitive authority in one domain.' :
-                v<=6 ? 'Rewards a strong core specialism paired with broad cross-domain awareness.' :
-                       'Rewards generalists who synthesise insights across disciplines and connect unusual dots.' },
-  { label:'Individual vs. Systemic Impact', left:'Direct 1-to-1 impact', right:'Systemic / scaled impact',
+  { idx:5, label:'Individual vs. Systemic Impact', left:'Direct 1-to-1 impact', right:'Systemic / scaled impact',
     expl: v => v<=3 ? 'Impact comes through direct, personal interaction with specific individuals.' :
                 v<=6 ? 'A mix of individual interaction and broader organisational or policy influence.' :
                        'Impact scales through systems, processes, or institutions that affect many people indirectly.' },
-];
-
-const Q_BIN_META = [
-  { label:'Analytical vs. Creative',
-    opts: [{ lbl:'A', txt:'Rigorous analysis — data, patterns, logical argument' }, { lbl:'B', txt:'Original output — concept, design, writing, prototype' }],
-    expl: v => v===0 ? 'This role rewards rigorous analytical thinking — pattern recognition, evidence-based reasoning, and data fluency are core.' :
+  { idx:6, label:'Analytical vs. Creative', left:'Rigorous analysis', right:'Original creative output',
+    expl: v => v<=3 ? 'This role rewards rigorous analytical thinking — pattern recognition, evidence-based reasoning, and data fluency are core.' :
+                v<=6 ? 'A blend of analytical and creative thinking is required — neither dominates exclusively.' :
                        'This role rewards original creative output — generating novel ideas, aesthetics, or expressions is the primary skill.' },
-  { label:'Influence vs. Problem-Solving',
-    opts: [{ lbl:'A', txt:'Convinced someone important to see things my way' }, { lbl:'B', txt:'Made something work that wasn\'t working before' }],
-    expl: v => v===0 ? 'Success depends on persuasion and building alignment — stakeholder management is a core daily skill.' :
-                       'Success means making things work — technical, diagnostic, or engineering problem-solving dominates.' },
-  { label:'Leadership vs. Craft Mastery',
-    opts: [{ lbl:'A', txt:'Set direction, develop people, impact through others' }, { lbl:'B', txt:'Best in the room at one thing — the go-to expert' }],
-    expl: v => v===0 ? 'Scale and people leadership define progression — impact flows through teams and organisations, not individual craft.' :
-                       'Individual technical mastery defines progression — being the definitive expert is the aspiration.' },
-  { label:'Novelty vs. Mastery',
-    opts: [{ lbl:'A', txt:'New challenges, new people, no two days the same' }, { lbl:'B', txt:'Recurring deep challenges — measurably better each week' }],
-    expl: v => v===0 ? 'Variety and adaptability are energising — boredom from repetition is a real risk.' :
+  { idx:9, label:'Novelty vs. Mastery', left:'Variety / new challenges', right:'Deep recurring mastery',
+    expl: v => v<=3 ? 'Variety and adaptability are energising — variety of contexts and challenges drives engagement.' :
+                v<=6 ? 'A mix of new challenges and recurring skill-deepening maintains engagement.' :
                        'Deepening mastery over time is intrinsically rewarding — compound improvement is the model.' },
 ];
 
 function buildInsightHTML(job) {
   const uv = state.results.userVec;
 
-  const sliders = Q_META.map((m, i) => {
-    const jv = job.vector[i];
-    const uval = uv[i];
+  // Slider dimensions — Q_META now has explicit idx and handles both raw (×1) and scaled (×10) job values
+  const sliders = Q_META.map(m => {
+    const jv_raw = job.vector[m.idx];
+    const jv = (m.idx >= 6 && m.idx <= 9) ? jv_raw * 10 : jv_raw; // scale 0/1 → 0/10 for indices 6-9
+    const uval = uv[m.idx];
     const jp = (jv / 10 * 100).toFixed(1);
     const up = (uval / 10 * 100).toFixed(1);
     return `<div class="insight-dim-row">
@@ -2816,24 +2816,33 @@ function buildInsightHTML(job) {
     </div>`;
   });
 
-  const binaries = Q_BIN_META.map((m, i) => {
-    const qi = i + 6;
-    const jobIdeal   = job.vector[qi];          // 0 or 1
-    const userChoice = uv[qi] === 10 ? 1 : 0;   // stored as 0 or 10
-    const chips = m.opts.map((opt, oi) => {
-      const isUser = userChoice === oi;
-      const isJob  = jobIdeal   === oi;
-      let cls = 'insight-choice-chip';
-      if (isUser) cls += ' user-match';
-      if (isJob)  cls += ' job-ideal';
-      return `<div class="${cls}"><div class="insight-choice-label">${opt.lbl}</div>${opt.txt}</div>`;
+  // Chip sections for Q8–Q11: show user's selections, highlight those that match this career
+  function chipSectionHTML(label, answers, map) {
+    if (!answers || answers.length === 0) return '';
+    const matchCount = answers.filter(a => (map[a]?.jobs || []).includes(job.name)).length;
+    const pills = answers.map(a => {
+      const matches = (map[a]?.jobs || []).includes(job.name);
+      return `<span class="insight-chip-pill${matches ? ' chip-match' : ''}">${a}</span>`;
     }).join('');
+    const note = matchCount === 0
+      ? 'None of your picks are typical for this career.'
+      : matchCount === answers.length
+        ? 'All your picks align well with this career.'
+        : `${matchCount} of ${answers.length} picks are typical for this career.`;
     return `<div class="insight-dim-row">
-      <div class="insight-dim-label">${m.label}</div>
-      <div class="insight-binary-row">${chips}</div>
-      <div class="insight-dim-expl">${m.expl(jobIdeal)}</div>
+      <div class="insight-dim-label">${label}</div>
+      <div class="insight-chip-row">${pills}</div>
+      <div class="insight-chip-match-note">${note}</div>
     </div>`;
-  });
+  }
+
+  const a = state.answers;
+  const chipSections = [
+    chipSectionHTML('Activities', a.q8activities,    ACTIVITIES_MAP),
+    chipSectionHTML('Problems',   a.q9problems,      PROBLEMS_MAP),
+    chipSectionHTML('Environment',a.q10environment,  ENVIRONMENT_MAP),
+    chipSectionHTML('Tolerance',  a.q11tolerance,    TOLERANCE_MAP),
+  ].filter(Boolean).join('');
 
   return `<div class="insight-title">Dimension-by-dimension comparison</div>
     <div style="font-family:'Inter',sans-serif;font-size:11px;color:var(--grey);margin-bottom:16px;">
@@ -2842,8 +2851,7 @@ function buildInsightHTML(job) {
     <div class="insight-dims">
       <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:2px;">Work preferences</div>
       ${sliders.join('')}
-      <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 2px;">Working style</div>
-      ${binaries.join('')}
+      ${chipSections ? `<div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 2px;">Your selections</div>${chipSections}` : ''}
     </div>`;
 }
 
